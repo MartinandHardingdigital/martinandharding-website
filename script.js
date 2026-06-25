@@ -104,7 +104,7 @@ if (scrollStage && !prefersReducedMotion) {
 
 // ---------- Cookie consent (categories) + gated scripts ----------
 // TODO: replace with your real GA4 Measurement ID from analytics.google.com
-const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+const GA_MEASUREMENT_ID = 'G-7LYB56D3D0';
 const CONSENT_KEY = 'cookie-consent';
 
 const COOKIE_CATEGORIES = [
