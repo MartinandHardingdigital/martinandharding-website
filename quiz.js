@@ -29,11 +29,11 @@ const QUESTIONS = [
     title: "What's your main goal with this website?",
     sub: 'Pick the one that matters most right now.',
     options: [
-      { value: 'google',   icon: '🔍', label: 'Get found on Google',         sub: 'Show up when locals search for what I offer' },
-      { value: 'showcase', icon: '🎨', label: 'Showcase my work',             sub: 'A portfolio or gallery that wins me clients' },
-      { value: 'sell',     icon: '🛍️', label: 'Sell products online',         sub: 'Take payments and manage orders through my site' },
-      { value: 'bookings', icon: '📅', label: 'Take bookings online',         sub: 'Let customers book appointments or reserve spots' },
-      { value: 'presence', icon: '✨', label: 'Get a professional presence',  sub: 'A site I can be proud of and share with confidence' },
+      { value: 'google',   label: 'Get found on Google',        sub: 'Show up when locals search for what I offer' },
+      { value: 'showcase', label: 'Showcase my work',            sub: 'A portfolio or gallery that wins me clients' },
+      { value: 'sell',     label: 'Sell products online',        sub: 'Take payments and manage orders through my site' },
+      { value: 'bookings', label: 'Take bookings online',        sub: 'Let customers book appointments or reserve spots' },
+      { value: 'presence', label: 'Get a professional presence', sub: 'A site I can be proud of and share with confidence' },
     ],
   },
   {
@@ -43,13 +43,12 @@ const QUESTIONS = [
     title: 'Do you need any of these features?',
     sub: 'Select everything that applies — or the last option if you just need a great website.',
     options: [
-      { value: 'shop',     icon: '🛒', label: 'Online shop' },
-      { value: 'booking',  icon: '📆', label: 'Booking system' },
-      { value: 'payments', icon: '💳', label: 'Online payments' },
-      { value: 'blog',     icon: '✍️', label: 'Blog or news section' },
-      { value: 'chat',     icon: '💬', label: 'Live chat widget' },
-      { value: 'social',   icon: '📱', label: 'Social media feed' },
-      { value: 'none',     icon: '✅', label: 'None — just a great website' },
+      { value: 'shop',     label: 'Online shop' },
+      { value: 'booking',  label: 'Booking system' },
+      { value: 'payments', label: 'Online payments' },
+      { value: 'blog',     label: 'Blog or news section' },
+      { value: 'chat',     label: 'Live chat widget' },
+      { value: 'none',     label: 'None — just a great website' },
     ],
   },
   {
@@ -59,10 +58,10 @@ const QUESTIONS = [
     title: 'How big does your site need to be?',
     sub: "Not sure? Pick the last option and we'll work it out for you.",
     options: [
-      { value: 'small',  icon: '🏠', label: '1–3 pages',             sub: 'Home, about, and contact. Simple and clean.' },
-      { value: 'medium', icon: '🏢', label: '4–6 pages',             sub: 'Services, gallery, testimonials — the full picture.' },
-      { value: 'large',  icon: '🏙️', label: '7 or more pages',      sub: 'Multiple services, team, blog, and more.' },
-      { value: 'unsure', icon: '🤔', label: 'Not sure — help me decide', sub: "We'll recommend based on your goals and business." },
+      { value: 'small',  label: '1–3 pages',              sub: 'Home, about, and contact. Simple and clean.' },
+      { value: 'medium', label: '4–6 pages',              sub: 'Services, gallery, testimonials — the full picture.' },
+      { value: 'large',  label: '7 or more pages',        sub: 'Multiple services, team, blog, and more.' },
+      { value: 'unsure', label: 'Not sure — help me decide', sub: "We'll recommend based on your goals and business." },
     ],
   },
   {
@@ -72,9 +71,9 @@ const QUESTIONS = [
     title: 'Would you like monthly support after launch?',
     sub: 'All plans are month-to-month — no contracts, cancel any time.',
     options: [
-      { value: 'yes',    icon: '🙌', label: 'Yes — look after it for me',  sub: 'Updates, SEO, security, and peace of mind every month' },
-      { value: 'no',     icon: '🚀', label: 'Just the build for now',      sub: "I'll handle it, or add support whenever I'm ready" },
-      { value: 'unsure', icon: '💭', label: 'Tell me what\'s included',    sub: 'Include your best recommendation in my plan' },
+      { value: 'yes',    label: 'Yes — look after it for me', sub: 'Updates, SEO, security, and peace of mind every month' },
+      { value: 'no',     label: 'Just the build for now',     sub: "I'll handle it, or add support whenever I'm ready" },
+      { value: 'unsure', label: "Tell me what's included",    sub: 'Include your best recommendation in my plan' },
     ],
   },
 ];
@@ -139,7 +138,6 @@ function buildStepHTML(q) {
   } else if (q.type === 'single') {
     body = `<div class="quiz-options">${q.options.map(o => `
       <button class="quiz-option${answers[q.id] === o.value ? ' selected' : ''}" data-value="${o.value}">
-        <span class="quiz-option-icon">${o.icon}</span>
         <span class="quiz-option-text">
           <span class="quiz-option-label">${o.label}</span>
           <span class="quiz-option-sub">${o.sub}</span>
@@ -151,7 +149,6 @@ function buildStepHTML(q) {
     const sel = answers[q.id] || [];
     body = `<div class="quiz-options quiz-options-multi">${q.options.map(o => `
       <button class="quiz-option${sel.includes(o.value) ? ' selected' : ''}" data-value="${o.value}">
-        <span class="quiz-option-icon">${o.icon}</span>
         <span class="quiz-option-label">${o.label}</span>
         <span class="quiz-option-check"></span>
       </button>`).join('')}</div>`;
@@ -274,7 +271,7 @@ async function runAI() {
       }),
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP_${res.status}`);
 
     const data = await res.json();
     let raw = (data.content[0].text || '').trim();
@@ -282,7 +279,16 @@ async function runAI() {
     showResults(JSON.parse(raw));
   } catch (err) {
     console.error('Quiz error:', err);
-    showError();
+    const isLocal = window.location.protocol === 'file:';
+    if (isLocal) {
+      showError('The quiz needs to run on your live Netlify site — it won\'t work when the file is opened directly from your computer. Deploy to Netlify first, then test it there.');
+    } else if (err.message.includes('HTTP_401')) {
+      showError('The API key isn\'t set yet. In the Netlify dashboard go to Site configuration → Environment variables and add <strong>ANTHROPIC_API_KEY</strong>, then redeploy.');
+    } else if (err.message.includes('HTTP_5')) {
+      showError('The plan generator hit an error on our end. Please try again in a moment.');
+    } else {
+      showError();
+    }
   }
 }
 
