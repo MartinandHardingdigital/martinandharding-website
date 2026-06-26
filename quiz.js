@@ -24,10 +24,10 @@ const QUESTIONS = [
   },
   {
     id: 'goal',
-    type: 'single',
+    type: 'multi',
     count: '2 of 5',
-    title: "What's your main goal with this website?",
-    sub: 'Pick the one that matters most right now.',
+    title: 'What are your goals for this website?',
+    sub: 'Select everything that applies.',
     options: [
       { value: 'google',   label: 'Get found on Google',        sub: 'Show up when locals search for what I offer' },
       { value: 'showcase', label: 'Showcase my work',            sub: 'A portfolio or gallery that wins me clients' },
@@ -149,7 +149,9 @@ function buildStepHTML(q) {
     const sel = answers[q.id] || [];
     body = `<div class="quiz-options quiz-options-multi">${q.options.map(o => `
       <button class="quiz-option${sel.includes(o.value) ? ' selected' : ''}" data-value="${o.value}">
-        <span class="quiz-option-label">${o.label}</span>
+        ${o.sub
+          ? `<span class="quiz-option-text"><span class="quiz-option-label">${o.label}</span><span class="quiz-option-sub">${o.sub}</span></span>`
+          : `<span class="quiz-option-label">${o.label}</span>`}
         <span class="quiz-option-check"></span>
       </button>`).join('')}</div>`;
   }
@@ -281,23 +283,25 @@ async function runAI() {
     console.error('Quiz error:', err);
     const isLocal = window.location.protocol === 'file:';
     if (isLocal) {
-      showError('The quiz needs to run on your live Netlify site — it won\'t work when the file is opened directly from your computer. Deploy to Netlify first, then test it there.');
+      showError('The quiz needs to run on your live Netlify site — it won\'t work when the file is opened directly from your computer.');
     } else if (err.message.includes('HTTP_401')) {
-      showError('The API key isn\'t set yet. In the Netlify dashboard go to Site configuration → Environment variables and add <strong>ANTHROPIC_API_KEY</strong>, then redeploy.');
+      showError('API key not recognised. Check that <strong>ANTHROPIC_API_KEY</strong> is set correctly in Netlify → Site configuration → Environment variables, then trigger a new deploy.');
+    } else if (err.message.includes('HTTP_404')) {
+      showError('The AI function wasn\'t found (404). Make sure the site has been redeployed after the latest push — Netlify needs to pick up the new <code>netlify/functions/quiz.js</code> file.');
     } else if (err.message.includes('HTTP_5')) {
-      showError('The plan generator hit an error on our end. Please try again in a moment.');
+      showError('The plan generator returned a server error. Please try again in a moment.');
     } else {
-      showError();
+      showError(`Something went wrong (${err.message}). Try again or <a href="index.html#contact" style="color:var(--blue);font-weight:600">contact us</a> directly.`);
     }
   }
 }
 
 function buildPrompt() {
   const goalLabels = {
-    google:   'Get found on Google — show up when locals search for my services',
-    showcase: 'Showcase my work — portfolio or gallery for potential clients',
-    sell:     'Sell products online — take payments and manage orders',
-    bookings: 'Take bookings or appointments — let customers book directly',
+    google:   'Get found on Google',
+    showcase: 'Showcase my work / portfolio',
+    sell:     'Sell products online',
+    bookings: 'Take bookings online',
     presence: 'Get a professional online presence',
   };
   const sizeLabels = {
@@ -312,6 +316,8 @@ function buildPrompt() {
     unsure: 'Not sure — include your best recommendation',
   };
 
+  const goals     = answers.goal || [];
+  const goalsText = goals.length ? goals.map(g => goalLabels[g] || g).join(', ') : 'Not specified';
   const feats     = answers.features || [];
   const featsText = feats.includes('none') || feats.length === 0
     ? 'None beyond a great website'
@@ -337,11 +343,11 @@ Monthly Care Plans (month-to-month, no lock-in, 50% off):
 - SEO Booster £199/mo (was £398, standalone add-on): 4 blog posts/month, local citation building, Google Business optimisation, backlink outreach, weekly rank tracking.
 
 RULES:
-- Client wants to sell products (shop/e-commerce goal) → recommend Custom, set build_price to "Custom quote", starting_total to "Custom quote".
+- "sell" is one of the client's goals → recommend Custom, set build_price to "Custom quote", starting_total to "Custom quote".
 - Booking needed + Starter or Growth recommended → add Complex Integration (£300). Pro already includes booking — do NOT add booking add-on for Pro.
 - Payment gateway wanted → add Complex Integration (£300) unless Custom is recommended.
-- Live chat or social feed wanted → add Standard Integration (£150).
-- Goal is "get found on Google" → recommend Growth Care or better; mention SEO Booster if budget allows.
+- Live chat wanted → add Standard Integration (£150).
+- "google" is one of the goals → recommend Growth Care or better.
 - support = "no" → set care_plan_optional true, still recommend a plan so they know what's available.
 - starting_total = build price + all add-on prices as a formatted £ amount. If Custom, use "Custom quote".
 - monthly_from = care plan price (e.g. "£199/mo").
@@ -349,7 +355,7 @@ RULES:
 
 CLIENT ANSWERS:
 Business: ${answers.business || 'Not provided'}
-Goal: ${goalLabels[answers.goal] || answers.goal || 'Not specified'}
+Goals: ${goalsText}
 Features needed: ${featsText}
 Website size: ${sizeLabels[answers.size] || answers.size || 'Not specified'}
 Monthly support: ${supportLabels[answers.support] || answers.support || 'Not specified'}
