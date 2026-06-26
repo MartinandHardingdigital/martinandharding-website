@@ -10,6 +10,14 @@ navToggle.addEventListener('click', () => {
   navToggle.classList.toggle('active', open);
 });
 
+document.querySelectorAll('.nav-links a, .nav-actions a').forEach((link) => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    navActions.classList.remove('open');
+    navToggle.classList.remove('active');
+  });
+});
+
 document.querySelectorAll('.glow-card').forEach((card) => {
   card.addEventListener('pointermove', (e) => {
     const rect = card.getBoundingClientRect();
