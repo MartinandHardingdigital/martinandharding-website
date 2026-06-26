@@ -1,13 +1,18 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
 const navToggle = document.getElementById('navToggle');
-const navLinks = document.querySelector('.nav-links');
-const navActions = document.querySelector('.nav-actions');
+const navDropdown = document.querySelector('.nav-dropdown');
 
 navToggle.addEventListener('click', () => {
-  const open = navLinks.classList.toggle('open');
-  navActions.classList.toggle('open');
+  const open = navDropdown.classList.toggle('open');
   navToggle.classList.toggle('active', open);
+});
+
+document.querySelectorAll('.nav-dropdown a').forEach((link) => {
+  link.addEventListener('click', () => {
+    navDropdown.classList.remove('open');
+    navToggle.classList.remove('active');
+  });
 });
 
 document.querySelectorAll('.glow-card').forEach((card) => {
