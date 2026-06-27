@@ -246,13 +246,24 @@
           </div>
         </div>
         <div class="field">
-          <label for="budget">Which package are you interested in?</label>
-          <select id="budget" name="budget">
-            <option>Starter — £399.50</option>
-            <option>Standard — £599.50</option>
-            <option>E-commerce — custom quote</option>
-            <option>Not sure — let's talk</option>
-          </select>
+          <!-- Normal mode: shown to direct visitors (no quiz data) -->
+          <div id="planNormal">
+            <label for="budget">Which package are you interested in?</label>
+            <select id="budget" name="budget">
+              <option value="">Not sure — let's talk</option>
+              <option value="Starter — £399.50">Starter — £399.50</option>
+              <option value="Standard — £599.50">Standard — £599.50</option>
+              <option value="E-commerce — £899.50">E-commerce — £899.50</option>
+            </select>
+          </div>
+          <!-- Quiz mode: shown when arriving from the plan finder -->
+          <div id="planQuiz" style="display:none">
+            <input type="hidden" name="budget" id="planQuizHidden" value="Quiz result">
+            <label>Your selected plan</label>
+            <div class="quiz-plan-summary" id="quizPlanSummary">
+              <!-- Populated by script.js when sessionStorage quiz data is present -->
+            </div>
+          </div>
         </div>
         <div class="field">
           <label for="message">Tell us about your project</label>

@@ -27,12 +27,49 @@ const form = document.getElementById('contactForm');
 const note = document.getElementById('formNote');
 
 if (form) {
-  // Pre-fill message textarea when arriving from the quiz plan finder
-  const savedPlan  = sessionStorage.getItem('quizPlan');
-  const messageField = document.getElementById('message');
-  if (savedPlan && messageField) {
-    messageField.value = savedPlan;
-    sessionStorage.removeItem('quizPlan');
+  // When arriving from the quiz, switch the plan field to a read-only summary
+  // and pre-fill the message textarea with the itemised plan text.
+  const savedPlanRaw = sessionStorage.getItem('quizPlan');
+  if (savedPlanRaw) {
+    let planData = null;
+    try { planData = JSON.parse(savedPlanRaw); } catch (_) {}
+
+    if (planData && Array.isArray(planData.items) && planData.items.length) {
+      // Hide the normal package dropdown and show the quiz result instead
+      const planNormal   = document.getElementById('planNormal');
+      const planQuiz     = document.getElementById('planQuiz');
+      const budgetSelect = document.getElementById('budget');
+      const planSummary  = document.getElementById('quizPlanSummary');
+      const planLabel    = document.getElementById('planQuizHidden');
+
+      if (planNormal) planNormal.style.display = 'none';
+      if (planQuiz)   planQuiz.style.display   = '';
+      if (budgetSelect) budgetSelect.disabled   = true; // exclude from submission
+
+      // Set the hidden budget field to a short plan identifier for the email subject
+      if (planLabel) {
+        const firstItem = planData.items[0].label.replace(' build', '');
+        planLabel.value = 'Quiz result — ' + firstItem;
+      }
+
+      // Render the dark itemised breakdown
+      if (planSummary) {
+        planSummary.innerHTML = planData.items.map(item => {
+          let cls = 'quiz-plan-row';
+          if (item.isTotal) cls += ' quiz-plan-row--total';
+          if (item.isMrr)   cls += ' quiz-plan-row--mrr';
+          return '<div class="' + cls + '"><span>' + item.label + '</span><strong>' + item.value + '</strong></div>';
+        }).join('');
+      }
+
+      // Pre-fill message with the plain-text summary
+      const messageField = document.getElementById('message');
+      if (messageField && planData.text) {
+        messageField.value = planData.text;
+      }
+
+      sessionStorage.removeItem('quizPlan');
+    }
   }
 
   form.addEventListener('submit', async (e) => {

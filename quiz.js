@@ -60,13 +60,13 @@
       title: "What's your rough budget for the build?",
       options: [
         { value: 'under500', label: 'Under £500',   sub: 'Tight budget, needs to be lean' },
-        { value: '500-750',  label: '£500–£750', sub: 'Room for a solid marketing website' },
+        { value: '500-750',  label: '£500–£750',    sub: 'Room for a solid marketing website' },
         { value: '750plus',  label: '£750+',         sub: 'Ready to invest for the right result' },
       ],
     },
   ];
 
-  // ── Plan data ─────────────────────────────────────────────────
+  // ── Plan catalogue ────────────────────────────────────────────
   const PLAN = {
     starter: {
       name: 'Starter',
@@ -100,10 +100,10 @@
     },
     ecommerce: {
       name: 'E-commerce',
-      price: null,
-      priceDisplay: 'Custom quote',
-      was: null,
-      meta: 'Online shop · custom timeline',
+      price: 899.50,
+      priceDisplay: '£899.50',
+      was: '£1,799',
+      meta: 'Online shop · launches in 7–10 days',
       features: [
         'Full online shop setup',
         'Secure checkout & card payments',
@@ -111,7 +111,7 @@
         'Order notifications',
         'Mobile-optimised checkout',
       ],
-      fallback: "An e-commerce build is exactly right for where you want to go. We'll set up a complete online shop with a secure checkout so you can start selling straight away. Every store is a little different, so we'll put together a custom quote once we've talked through the scope.",
+      fallback: "An e-commerce build is exactly right for where you want to go. We'll set up a complete online shop with a secure checkout so you can start selling straight away.",
     },
   };
 
@@ -173,7 +173,7 @@
     setTimeout(() => { cb(); quizCard.style.opacity = '1'; }, 250);
   }
 
-  // ── Plan logic ────────────────────────────────────────────────
+  // ── Plan selection ────────────────────────────────────────────
   function pickPlan(ans) {
     if (ans.goal === 'sell' || ans.pages === 'shop' || ans.payments === 'sell_products') return 'ecommerce';
     if (ans.goal === 'above_all' || ans.payments === 'bookings' || ans.payments === 'other' || ans.pages === '5-10') return 'standard';
@@ -181,7 +181,7 @@
     return 'standard';
   }
 
-  // ── Add-on logic ──────────────────────────────────────────────
+  // ── Add-on selection ──────────────────────────────────────────
   function buildAddons(ans, planKey) {
     const list = [];
     let hasAdvancedFromPayments = false;
@@ -203,45 +203,61 @@
     return list;
   }
 
-  // ── Budget check — always returns both options ────────────────
-  // isMismatch=false means the ideal plan fits the budget (both cards show same plan).
-  // isMismatch=true means the ideal plan exceeds budget; withinBudget is a stripped-down option.
+  // ── Budget check ──────────────────────────────────────────────
+  // Always returns { ideal, withinBudget, isMismatch }.
+  // isMismatch=false: ideal plan fits budget — withinBudget === ideal, show one card.
+  // isMismatch=true: budget exceeded — withinBudget is a stripped-down option, show two cards.
+  //
+  // Greedy cascade: try current plan with fewer add-ons, then Standard (if ideal was E-commerce),
+  // then Starter. Always produces a real calculated price.
   function checkBudget(planKey, addons, budgetKey) {
-    const buildPrice = PLAN[planKey].price;
     const budgetMax  = BUDGET_MAX[budgetKey] || Infinity;
+    const buildPrice = PLAN[planKey].price;
     const addonTotal = addons.reduce((s, a) => s + a.price, 0);
-    const idealTotal = buildPrice !== null ? buildPrice + addonTotal : null;
+    const idealTotal = buildPrice + addonTotal;
     const ideal      = { planKey, addons, price: idealTotal };
 
-    // E-commerce has no fixed price, or plan+addons already fit
-    if (buildPrice === null || (idealTotal !== null && idealTotal <= budgetMax)) {
+    if (idealTotal <= budgetMax) {
       return { ideal, withinBudget: ideal, isMismatch: false };
     }
 
-    // Greedy: drop most expensive add-ons first
-    const sorted = [...addons].sort((a, b) => b.price - a.price);
-    for (let skip = 1; skip <= sorted.length; skip++) {
-      const kept  = sorted.slice(skip);
-      const total = buildPrice + kept.reduce((s, a) => s + a.price, 0);
-      if (total <= budgetMax) {
-        return { ideal, withinBudget: { planKey, addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: false }, isMismatch: true };
-      }
-    }
+    // Order of plans to attempt when dropping budget, from most to least expensive
+    const planOrder  = ['ecommerce', 'standard', 'starter'];
+    const startIdx   = planOrder.indexOf(planKey);
+    // Sort add-ons descending by price so we drop the most expensive first
+    const sorted     = [...addons].sort((a, b) => b.price - a.price);
 
-    // Try Starter plan
-    if (planKey !== 'starter') {
-      const sp = PLAN.starter.price;
-      for (let skip = 0; skip <= sorted.length; skip++) {
+    for (let pi = startIdx; pi < planOrder.length; pi++) {
+      const tryKey   = planOrder[pi];
+      const tryPrice = PLAN[tryKey].price;
+      // For the current plan we already know skip=0 fails, so start from 1
+      const minSkip  = pi === startIdx ? 1 : 0;
+
+      for (let skip = minSkip; skip <= sorted.length; skip++) {
         const kept  = sorted.slice(skip);
-        const total = sp + kept.reduce((s, a) => s + a.price, 0);
+        const total = tryPrice + kept.reduce((s, a) => s + a.price, 0);
         if (total <= budgetMax) {
-          return { ideal, withinBudget: { planKey: 'starter', addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: true }, isMismatch: true };
+          return {
+            ideal,
+            withinBudget: {
+              planKey:       tryKey,
+              addons:        kept,
+              price:         total,
+              dropped:       sorted.slice(0, skip).map(a => a.name),
+              planDowngraded: tryKey !== planKey,
+            },
+            isMismatch: true,
+          };
         }
       }
     }
 
-    // Last resort: Starter alone
-    return { ideal, withinBudget: { planKey: 'starter', addons: [], price: PLAN.starter.price, dropped: addons.map(a => a.name), planDowngraded: planKey !== 'starter' }, isMismatch: true };
+    // Safety fallback — Starter alone always fits every tier in practice
+    return {
+      ideal,
+      withinBudget: { planKey: 'starter', addons: [], price: PLAN.starter.price, dropped: addons.map(a => a.name), planDowngraded: planKey !== 'starter' },
+      isMismatch: true,
+    };
   }
 
   // ── Render a question ─────────────────────────────────────────
@@ -253,15 +269,14 @@
 
     setProgress(((index + 1) / QUESTIONS.length) * 100);
     backBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
-    nextBtn.style.display = 'none'; // all questions auto-advance
-    quizNav.style.display = '';
+    nextBtn.style.display    = 'none'; // all questions auto-advance; no Next button shown
+    quizNav.style.display    = '';
 
     const optionsHtml = q.options.map(opt => {
       const sel = selVal === opt.value;
       return (
         '<button class="quiz-option' + (sel ? ' selected' : '') + '" ' +
-          'data-value="' + opt.value + '" ' +
-          'role="radio" aria-checked="' + sel + '" type="button">' +
+          'data-value="' + opt.value + '" role="radio" aria-checked="' + sel + '" type="button">' +
           '<span class="quiz-option-check" aria-hidden="true"></span>' +
           '<span class="quiz-option-text">' +
             '<span class="quiz-option-label">' + opt.label + '</span>' +
@@ -281,13 +296,12 @@
       '</div>'
     );
 
-    const btns = quizCard.querySelectorAll('.quiz-option');
-    btns.forEach(btn => {
+    quizCard.querySelectorAll('.quiz-option').forEach(btn => {
       btn.addEventListener('click', () => {
         clearTimeout(autoAdvanceTimer);
         answers[q.id] = btn.dataset.value;
 
-        btns.forEach(b => {
+        quizCard.querySelectorAll('.quiz-option').forEach(b => {
           const s = b === btn;
           b.classList.toggle('selected', s);
           b.setAttribute('aria-checked', s);
@@ -301,9 +315,7 @@
   // ── Navigation ────────────────────────────────────────────────
   function advance() {
     clearTimeout(autoAdvanceTimer);
-    const ans    = answers[QUESTIONS[currentQuestion].id];
-    const hasAns = !!ans;
-    if (!hasAns) return;
+    if (!answers[QUESTIONS[currentQuestion].id]) return;
 
     if (currentQuestion < QUESTIONS.length - 1) {
       currentQuestion++;
@@ -326,9 +338,7 @@
     const planKey    = pickPlan(answers);
     const addons     = buildAddons(answers, planKey);
     const careTier   = CARE[answers.care] || null;
-    const buildPrice = PLAN[planKey].price;
-    const addonTotal = addons.reduce((s, a) => s + a.price, 0);
-    const totalPrice = buildPrice !== null ? buildPrice + addonTotal : null;
+    const totalPrice = PLAN[planKey].price + addons.reduce((s, a) => s + a.price, 0);
     const budget     = checkBudget(planKey, addons, answers.budget);
 
     setProgress(100);
@@ -359,9 +369,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan:         PLAN[planKey].name,
-          buildPrice:   totalPrice !== null ? PLAN[planKey].priceDisplay : 'Custom quote',
+          buildPrice:   PLAN[planKey].priceDisplay,
           addons:       addons.map(a => ({ name: a.name, price: a.priceDisplay })),
-          upfrontTotal: totalPrice !== null ? '£' + totalPrice.toFixed(2) : 'Custom quote',
+          upfrontTotal: '£' + totalPrice.toFixed(2),
           careTier:     careTier ? { name: careTier.name, price: careTier.priceDisplay } : null,
           answers,
         }),
@@ -374,7 +384,7 @@
         if (data.explanation) explanation = data.explanation;
       }
     } catch (_) {
-      // Timeout or network error — fallback explanation already set
+      // Timeout or network error — fallback text already set
     }
 
     fadeTransition(() => showResult(planKey, addons, careTier, totalPrice, budget, explanation));
@@ -384,21 +394,21 @@
   function showResult(planKey, addons, careTier, totalPrice, budget, explanation) {
     const plan = PLAN[planKey];
     const wb   = budget.withinBudget;
+    const wbTotal = PLAN[wb.planKey].price + wb.addons.reduce((s, a) => s + a.price, 0);
 
-    const wbBuildPrice = PLAN[wb.planKey].price;
-    const wbTotal      = wbBuildPrice !== null
-      ? wbBuildPrice + wb.addons.reduce((s, a) => s + a.price, 0)
-      : null;
+    // ── Shared helpers ────────────────────────────────────────
 
-    // Itemised dark summary box. Always shows care row if a care plan was chosen.
-    function summaryBox(pk, addonsArr, upfrontTotal) {
+    // Dark itemised summary box.
+    // Upfront total row only shown when there are add-ons (otherwise build price is the total).
+    // Care MRR row always appended if a care plan was chosen.
+    function summaryBox(pk, addonsArr, upfront) {
       const p = PLAN[pk];
       let rows = '<div class="quiz-result-sum-row"><span>' + p.name + ' build</span><strong>' + p.priceDisplay + '</strong></div>';
       addonsArr.forEach(a => {
         rows += '<div class="quiz-result-sum-row"><span>' + a.name + '</span><strong>' + a.priceDisplay + '</strong></div>';
       });
-      if (upfrontTotal !== null && addonsArr.length > 0) {
-        rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Upfront total</strong></span><strong>£' + upfrontTotal.toFixed(2) + '</strong></div>';
+      if (addonsArr.length > 0) {
+        rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Upfront total</strong></span><strong>£' + upfront.toFixed(2) + '</strong></div>';
       }
       if (careTier) {
         rows += '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + careTier.name + '</span><strong>' + careTier.priceDisplay + '</strong></div>';
@@ -410,9 +420,8 @@
       return '<ul class="quiz-result-list">' + PLAN[pk].features.map(f => '<li>' + f + '</li>').join('') + '</ul>';
     }
 
-    function addonsBlock(addonsArr) {
-      if (!addonsArr.length) return '';
-      return addonsArr.map(a =>
+    function addonsBlock(arr) {
+      return arr.map(a =>
         '<div class="quiz-result-addon">' +
           '<div class="quiz-result-addon-row">' +
             '<span class="quiz-result-addon-name">' + a.name + '</span>' +
@@ -423,61 +432,103 @@
       ).join('');
     }
 
+    // What was changed to reach the within-budget option
     function droppedNote() {
-      if (!wb.dropped) return '';
       const parts = [];
-      if (wb.planDowngraded) parts.push(plan.name + ' switched to Starter');
-      if (wb.dropped.length)  parts.push(wb.dropped.join(' and ') + ' removed');
+      if (wb.planDowngraded) parts.push(plan.name + ' plan reduced to ' + PLAN[wb.planKey].name);
+      if (wb.dropped && wb.dropped.length) parts.push(wb.dropped.join(' and ') + ' removed');
       return parts.length
         ? '<p class="quiz-result-rec-note">' + parts.join('; ') + ' to stay within budget.</p>'
         : '';
     }
 
-    // Builds the plain-text summary stored in sessionStorage for the contact form.
-    function buildPlanText(pk, addonsArr, upfrontTotal) {
-      const p = PLAN[pk];
-      const lines = ["I'd like to enquire about the following plan from your quiz:", ''];
-      lines.push(p.name + ' build — ' + p.priceDisplay);
-      addonsArr.forEach(a => lines.push(a.name + ' — ' + a.priceDisplay));
-      if (upfrontTotal !== null && addonsArr.length > 0) {
-        lines.push('Upfront total — £' + upfrontTotal.toFixed(2));
+    // Builds a JSON-serialisable plan text stored in sessionStorage for the contact form.
+    // items: array of { label, value, isTotal?, isMrr? }
+    // text: plain-text version pre-filled into the message textarea
+    function buildPlanText(pk, arr, upfront) {
+      const p     = PLAN[pk];
+      const items = [];
+
+      items.push({ label: p.name + ' build', value: p.priceDisplay });
+      arr.forEach(a => items.push({ label: a.name, value: a.priceDisplay }));
+      if (arr.length > 0) {
+        items.push({ label: 'Upfront total', value: '£' + upfront.toFixed(2), isTotal: true });
       }
-      if (careTier) lines.push(careTier.name + ' — ' + careTier.priceDisplay);
-      return lines.join('\n');
+      if (careTier) {
+        items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
+      }
+
+      const lines = ["I'd like to enquire about the following plan from your quiz:", ''];
+      items.forEach(item => lines.push(item.label + ' — ' + item.value));
+
+      return JSON.stringify({ items, text: lines.join('\n') });
     }
 
-    // ── Within-budget card ──────────────────────────────────────
-    const wbNote = budget.isMismatch
-      ? droppedNote()
-      : '<p class="quiz-result-rec-note">Great news — your best option also fits within your budget.</p>';
-
-    const wbCard =
-      '<div class="quiz-result-rec">' +
-        '<span class="quiz-result-rec-label">Within your budget</span>' +
-        '<h3 class="quiz-result-rec-title">' + PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '') + '</h3>' +
-        wbNote +
-        featuresList(wb.planKey) +
-        (wb.addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(wb.addons) + '</div>' : '') +
-        summaryBox(wb.planKey, wb.addons, wbTotal) +
-      '</div>';
-
-    // ── Ideal card ──────────────────────────────────────────────
-    const idealCard =
-      '<div class="quiz-result-rec quiz-result-rec--ideal">' +
-        '<span class="quiz-result-rec-label">Best for your needs</span>' +
-        '<h3 class="quiz-result-rec-title">' + plan.name + (addons.length ? ' + add-ons' : '') + '</h3>' +
-        featuresList(planKey) +
-        (addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(addons) + '</div>' : '') +
-        summaryBox(planKey, addons, totalPrice) +
-      '</div>';
-
-    // ── Care description box ────────────────────────────────────
+    // ── Care description box ──────────────────────────────────
     const careHtml = careTier
       ? '<div class="quiz-result-care-box">' +
-          '<div class="quiz-result-care-name">' + careTier.name + '<span class="quiz-result-care-price">' + careTier.priceDisplay + '</span></div>' +
+          '<div class="quiz-result-care-name">' + careTier.name +
+            '<span class="quiz-result-care-price">' + careTier.priceDisplay + '</span>' +
+          '</div>' +
           '<p class="quiz-result-care-reason">' + careTier.desc + '</p>' +
         '</div>'
       : '';
+
+    // ── CTA section with "Get in touch" enquiry flow ──────────
+    const ctasHtml =
+      '<div class="quiz-result-ctas">' +
+        '<div id="quizEnquireWrap">' +
+          '<button type="button" class="btn btn-dark btn-block" id="quizEnquireBtn">Get in touch →</button>' +
+        '</div>' +
+        '<a href="pricing.html" class="btn btn-ghost btn-block btn-sm">View all pricing</a>' +
+        '<a href="quiz.html" class="quiz-restart">← Start again</a>' +
+      '</div>';
+
+    // ── Build result HTML ────────────────────────────────────
+    let recsHtml;
+
+    if (!budget.isMismatch) {
+      // Single card: plan fits budget — one recommendation with a "fits your budget" badge
+      const title = plan.name + (addons.length ? ' + add-ons' : '');
+      recsHtml =
+        '<div class="quiz-result-solo">' +
+          '<div class="quiz-result-rec quiz-result-rec--ideal">' +
+            '<div class="quiz-result-rec-header-row">' +
+              '<span class="quiz-result-rec-label">Your recommendation</span>' +
+              '<span class="quiz-result-rec-budget-ok">✓ Fits your budget</span>' +
+            '</div>' +
+            '<h3 class="quiz-result-rec-title">' + title + '</h3>' +
+            featuresList(planKey) +
+            (addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(addons) + '</div>' : '') +
+            summaryBox(planKey, addons, totalPrice) +
+          '</div>' +
+        '</div>';
+    } else {
+      // Two cards: ideal plan exceeds budget — show budget-friendly option and best overall
+      const wbTitle    = PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '');
+      const idealTitle = plan.name + (addons.length ? ' + add-ons' : '');
+
+      const wbCard =
+        '<div class="quiz-result-rec">' +
+          '<span class="quiz-result-rec-label">Within your budget</span>' +
+          '<h3 class="quiz-result-rec-title">' + wbTitle + '</h3>' +
+          droppedNote() +
+          featuresList(wb.planKey) +
+          (wb.addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(wb.addons) + '</div>' : '') +
+          summaryBox(wb.planKey, wb.addons, wbTotal) +
+        '</div>';
+
+      const idealCard =
+        '<div class="quiz-result-rec quiz-result-rec--ideal">' +
+          '<span class="quiz-result-rec-label">Best for your needs</span>' +
+          '<h3 class="quiz-result-rec-title">' + idealTitle + '</h3>' +
+          featuresList(planKey) +
+          (addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(addons) + '</div>' : '') +
+          summaryBox(planKey, addons, totalPrice) +
+        '</div>';
+
+      recsHtml = '<div class="quiz-result-recs">' + wbCard + idealCard + '</div>';
+    }
 
     const html =
       '<div class="quiz-results">' +
@@ -485,25 +536,21 @@
           '<div class="quiz-result-badge">✓ Your personalised recommendation</div>' +
           '<p class="quiz-result-intro">' + explanation + '</p>' +
         '</div>' +
-        '<div class="quiz-result-recs">' + wbCard + idealCard + '</div>' +
+        recsHtml +
         careHtml +
-        '<div class="quiz-result-ctas">' +
-          '<div id="quizEnquireWrap">' +
-            '<button type="button" class="btn btn-dark btn-block" id="quizEnquireBtn">Get in touch →</button>' +
-          '</div>' +
-          '<a href="pricing.html" class="btn btn-ghost btn-block btn-sm">View all pricing</a>' +
-          '<a href="quiz.html" class="quiz-restart">← Start again</a>' +
-        '</div>' +
+        ctasHtml +
       '</div>';
 
     quizCard.innerHTML = html;
 
-    // ── Wire up enquiry CTA ────────────────────────────────────
+    // ── Wire up enquiry CTA ───────────────────────────────────
     document.getElementById('quizEnquireBtn').addEventListener('click', () => {
       if (budget.isMismatch) {
-        const wrap = document.getElementById('quizEnquireWrap');
-        const wbLabel   = PLAN[wb.planKey].name + (wb.addons.length ? ' (budget option)' : '');
+        // Show a plan-choice prompt before navigating
+        const wrap       = document.getElementById('quizEnquireWrap');
+        const wbLabel    = PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '') + ' (budget option)';
         const idealLabel = plan.name + (addons.length ? ' + add-ons' : '') + ' (best option)';
+
         wrap.innerHTML =
           '<p class="quiz-plan-choice-label">Which plan would you like to enquire about?</p>' +
           '<button type="button" class="btn btn-ghost btn-block quiz-plan-choice" data-which="within">Enquire about ' + wbLabel + '</button>' +

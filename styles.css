@@ -1248,6 +1248,46 @@ ul { padding: 0; margin: 0; list-style: none; }
 /* Checkbox-style indicator for multi-select questions */
 .quiz-options--checkbox .quiz-option-check { border-radius: 4px; }
 
+/* Single-recommendation card (plan fits budget — no mismatch) */
+.quiz-result-solo { margin-bottom: 16px; }
+.quiz-result-rec-header-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.quiz-result-rec-budget-ok {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #059669;
+  background: #d1fae5;
+  border-radius: 20px;
+  padding: 2px 9px;
+}
+
+/* Quiz plan summary shown in the contact form instead of the package dropdown */
+.quiz-plan-summary {
+  background: var(--ink);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 6px;
+  color: #fff;
+}
+.quiz-plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  font-size: 14px;
+  color: #c7c9cf;
+}
+.quiz-plan-row:last-child { border-bottom: none; padding-bottom: 0; }
+.quiz-plan-row strong { color: #fff; font-weight: 700; }
+.quiz-plan-row--total {
+  border-top: 1px solid rgba(255,255,255,.18);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+.quiz-plan-row--mrr strong { font-size: 15px; font-weight: 800; }
+
 /* Two-recommendation cards (shown when ideal plan exceeds budget) */
 .quiz-result-recs {
   display: grid;
