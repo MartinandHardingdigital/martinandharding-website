@@ -17,13 +17,13 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { plan, addons, careTier, totalPrice, answers } = JSON.parse(event.body);
+    const { plan, buildPrice, addons, upfrontTotal, careTier, answers } = JSON.parse(event.body);
 
     const goalMap = {
       showcase:  'show what they do and build credibility',
       enquiries: 'get more enquiries and convert visitors into leads',
       sell:      'sell products online and take payments',
-      above_all: 'do all of the above — showcase, get enquiries, and sell',
+      above_all: 'do all of the above — showcase, enquiries, and selling',
     };
     const pagesMap = {
       '1-3':  '1–3 pages',
@@ -42,23 +42,24 @@ exports.handler = async (event) => {
       '750plus':  '£750 or more',
     };
 
-    const addonSummary = addons && addons.length > 0
-      ? 'plus ' + addons.map(a => a.name + ' (' + a.price + ')').join(' and ')
-      : 'no add-ons';
-
-    const careSummary = careTier
-      ? careTier.name + ' at ' + careTier.price
-      : 'no ongoing care plan';
+    // Build a concise itemised cost summary for the prompt
+    let costLines = plan + ' build: ' + buildPrice;
+    if (addons && addons.length > 0) {
+      costLines += '. Add-ons: ' + addons.map(a => a.name + ' ' + a.price).join(', ');
+    }
+    costLines += '. Upfront total: ' + upfrontTotal;
+    if (careTier) {
+      costLines += '. Ongoing: ' + careTier.name + ' ' + careTier.price;
+    }
 
     const prompt =
       'Write 2–3 warm, friendly sentences for a web design client. ' +
-      'They have been recommended: "' + plan + '" plan (' + totalPrice + '), ' +
-      addonSummary + ', ' + careSummary + '. ' +
+      'Recommendation: ' + costLines + '. ' +
       'Their answers: goal is to ' + (goalMap[answers.goal] || answers.goal) + ', ' +
-      'they need ' + (pagesMap[answers.pages] || answers.pages) + ', ' +
-      (paymentsMap[answers.payments] || '') + ', ' +
+      'needs ' + (pagesMap[answers.pages] || answers.pages) + ', ' +
+      (paymentsMap[answers.payments] ? paymentsMap[answers.payments] + ', ' : '') +
       'budget ' + (budgetMap[answers.budget] || answers.budget) + '. ' +
-      'Briefly explain why this recommendation suits them. Speak directly to the client. Be warm and encouraging. No bullet points or headings.';
+      'Briefly explain why this suits them. Speak directly. Warm, no bullet points.';
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

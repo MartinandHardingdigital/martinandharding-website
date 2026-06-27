@@ -1239,6 +1239,36 @@ ul { padding: 0; margin: 0; list-style: none; }
 /* Checkbox-style indicator for multi-select questions */
 .quiz-options--checkbox .quiz-option-check { border-radius: 4px; }
 
+/* Two-recommendation cards (shown when ideal plan exceeds budget) */
+.quiz-result-recs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.quiz-result-rec {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.quiz-result-rec--ideal { border-color: var(--blue); }
+.quiz-result-rec-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.quiz-result-rec--ideal .quiz-result-rec-label { color: var(--blue); }
+.quiz-result-rec-title { font-size: 17px; font-weight: 800; margin: 0; }
+.quiz-result-rec-note  { font-size: 12.5px; color: var(--ink-soft); margin: 0; line-height: 1.45; font-style: italic; }
+.quiz-result-rec-addons { display: flex; flex-direction: column; gap: 6px; }
+
 /* Budget mismatch box (right column of result screen) */
 .quiz-result-budget-box {
   background: #fffbeb;
@@ -1269,6 +1299,7 @@ ul { padding: 0; margin: 0; list-style: none; }
   .quiz-results { padding: 28px 22px 32px; }
   .quiz-nav     { padding: 14px 0 0; }
   .quiz-result-body  { grid-template-columns: 1fr; }
+  .quiz-result-recs  { grid-template-columns: 1fr; }
   .quiz-options-multi { grid-template-columns: 1fr; }
   .quiz-loading { padding: 52px 22px; }
   .quiz-error   { padding: 44px 22px; }

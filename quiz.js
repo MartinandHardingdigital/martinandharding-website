@@ -147,9 +147,9 @@
   // ── Care tiers ────────────────────────────────────────────────
   const CARE = {
     no:      null,
-    light:   { name: 'Basic Care',    priceDisplay: '£99/month',  price: 99,  desc: "You'd like occasional help after launch — Basic Care covers hosting, security updates, and small content changes so your site stays in great shape without you lifting a finger." },
-    regular: { name: 'Standard Care', priceDisplay: '£149/month', price: 149, desc: "You're after regular support after launch. Standard Care includes all updates, monthly SEO checks, and ongoing content tweaks to keep your site working hard for you." },
-    full:    { name: 'Premium Care',  priceDisplay: '£399/month', price: 399, desc: "You want full ongoing support — a great call. Premium Care covers everything: content, SEO, strategy, and proactive improvements every month." },
+    light:   { name: 'Basic Care',  priceDisplay: '£99/month',  price: 99,  desc: "You'd like occasional help after launch — Basic Care covers hosting, security updates, and small content changes so your site stays in great shape without you lifting a finger." },
+    regular: { name: 'Growth Care', priceDisplay: '£149/month', price: 149, desc: "You're after regular support after launch. Growth Care includes all updates, monthly SEO checks, and ongoing content tweaks to keep your site working hard for you." },
+    full:    { name: 'Pro Care',    priceDisplay: '£399/month', price: 399, desc: "You want full ongoing support — a great call. Pro Care covers everything: content, SEO, strategy, and proactive improvements every month." },
   };
 
   // ── Budget limits ─────────────────────────────────────────────
@@ -199,31 +199,55 @@
 
     const features = Array.isArray(ans.features) ? ans.features : [];
     if (!features.includes('none')) {
-      if (features.includes('simple'))                                    list.push(ADDON.simple);
-      if (features.includes('advanced') && !hasAdvancedFromPayments)     list.push(ADDON.advanced);
+      if (features.includes('simple'))                                list.push(ADDON.simple);
+      if (features.includes('advanced') && !hasAdvancedFromPayments) list.push(ADDON.advanced);
     }
 
     return list;
   }
 
   // ── Budget mismatch check ─────────────────────────────────────
+  // Returns null if upfront total fits the budget (or E-commerce, which has no fixed price).
+  // Returns { ideal, withinBudget } when the total exceeds the budget band.
+  // withinBudget is the best combination that fits, found by removing the most expensive
+  // add-ons first, then downgrading the plan if needed.
   function checkBudget(planKey, addons, budgetKey) {
     const buildPrice = PLAN[planKey].price;
-    if (buildPrice === null) return null;
+    if (buildPrice === null) return null; // E-commerce: skip budget check
 
     const budgetMax  = BUDGET_MAX[budgetKey] || Infinity;
     const addonTotal = addons.reduce((s, a) => s + a.price, 0);
-    const total      = buildPrice + addonTotal;
-    if (total <= budgetMax) return null;
+    const idealTotal = buildPrice + addonTotal;
+    if (idealTotal <= budgetMax) return null; // No mismatch
 
-    let withinBudget;
-    if (buildPrice <= budgetMax) {
-      withinBudget = { planKey, price: buildPrice };
-    } else {
-      withinBudget = { planKey: 'starter', price: PLAN.starter.price };
+    const ideal = { planKey, addons, price: idealTotal };
+
+    // Sort add-ons by price descending — drop most expensive first
+    const sorted = [...addons].sort((a, b) => b.price - a.price);
+
+    // Try ideal plan with progressively fewer add-ons
+    for (let skip = 1; skip <= sorted.length; skip++) {
+      const kept  = sorted.slice(skip);
+      const total = buildPrice + kept.reduce((s, a) => s + a.price, 0);
+      if (total <= budgetMax) {
+        return { ideal, withinBudget: { planKey, addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: false } };
+      }
     }
 
-    return { ideal: { planKey, addons, price: total }, withinBudget };
+    // Plan itself exceeds budget — try Starter
+    if (planKey !== 'starter') {
+      const sp = PLAN.starter.price;
+      for (let skip = 0; skip <= sorted.length; skip++) {
+        const kept  = sorted.slice(skip);
+        const total = sp + kept.reduce((s, a) => s + a.price, 0);
+        if (total <= budgetMax) {
+          return { ideal, withinBudget: { planKey: 'starter', addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: true } };
+        }
+      }
+    }
+
+    // Nothing fits — Starter alone is always the last resort
+    return { ideal, withinBudget: { planKey: 'starter', addons: [], price: PLAN.starter.price, dropped: addons.map(a => a.name), planDowngraded: planKey !== 'starter' } };
   }
 
   // ── Render a question ─────────────────────────────────────────
@@ -237,8 +261,16 @@
 
     setProgress(((index + 1) / QUESTIONS.length) * 100);
     backBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
-    nextBtn.disabled = isMulti ? selArr.length === 0 : !selVal;
     quizNav.style.display = '';
+
+    // Next button: hidden for single-select, "Continue" for multi-select only
+    if (isMulti) {
+      nextBtn.style.display = '';
+      nextBtn.textContent = 'Continue →';
+      nextBtn.disabled = selArr.length === 0;
+    } else {
+      nextBtn.style.display = 'none';
+    }
 
     const isSel = val => isMulti ? selArr.includes(val) : selVal === val;
 
@@ -297,6 +329,7 @@
         });
       });
     } else {
+      // Single-select: auto-advance 600ms after selection
       btns.forEach(btn => {
         btn.addEventListener('click', () => {
           clearTimeout(autoAdvanceTimer);
@@ -308,7 +341,6 @@
             b.setAttribute('aria-checked', s);
           });
 
-          nextBtn.disabled = false;
           autoAdvanceTimer = setTimeout(advance, 600);
         });
       });
@@ -376,9 +408,10 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan:       PLAN[planKey].name,
+          buildPrice: totalPrice !== null ? PLAN[planKey].priceDisplay : 'Custom quote',
           addons:     addons.map(a => ({ name: a.name, price: a.priceDisplay })),
+          upfrontTotal: totalPrice !== null ? '£' + totalPrice.toFixed(2) : 'Custom quote',
           careTier:   careTier ? { name: careTier.name, price: careTier.priceDisplay } : null,
-          totalPrice: totalPrice !== null ? '£' + totalPrice.toFixed(2) : 'Custom quote',
           answers,
         }),
         signal: controller.signal,
@@ -401,108 +434,143 @@
   function showResult(planKey, addons, careTier, totalPrice, budget, explanation) {
     const plan = PLAN[planKey];
 
-    const priceHtml = plan.was
-      ? '<span class="quiz-result-build-price">' + plan.priceDisplay + '</span>&nbsp;<span class="quiz-result-build-was">was ' + plan.was + '</span>'
-      : '<span class="quiz-result-build-price">' + plan.priceDisplay + '</span>';
-
-    // Add-ons (left column)
-    const addonsHtml = addons.length > 0
-      ? '<div class="quiz-result-section">' +
-          '<span class="quiz-result-label">Add-ons</span>' +
-          addons.map(a =>
-            '<div class="quiz-result-addon">' +
-              '<div class="quiz-result-addon-row">' +
-                '<span class="quiz-result-addon-name">' + a.name + '</span>' +
-                '<span class="quiz-result-addon-price">' + a.priceDisplay + '</span>' +
-              '</div>' +
-              '<p class="quiz-result-addon-desc">' + a.desc + '</p>' +
-            '</div>'
-          ).join('') +
-        '</div>'
-      : '';
-
-    // Budget note (right column — only when total exceeds budget)
-    let budgetHtml = '';
-    if (budget) {
-      const withinName  = PLAN[budget.withinBudget.planKey].name;
-      const withinPrice = '£' + budget.withinBudget.price.toFixed(2);
-      const withinDesc  = budget.withinBudget.planKey !== planKey
-        ? withinName + ' at ' + withinPrice + ' — a great starting point within your budget.'
-        : withinName + ' at ' + withinPrice + ' — all the core features without the add-ons.';
-      const idealDesc   = plan.name + (addons.length ? ' + add-ons' : '') + ' at £' + budget.ideal.price.toFixed(2) +
-        (addons.length ? ' — adds ' + addons.map(a => a.name.toLowerCase()).join(' and ') + '.' : '.');
-
-      budgetHtml = (
-        '<div class="quiz-result-budget-box">' +
-          '<span class="quiz-result-label">Budget options</span>' +
-          '<p class="quiz-result-budget-within"><strong>Within your budget:</strong> ' + withinDesc + '</p>' +
-          '<p class="quiz-result-budget-ideal"><strong>For everything you need:</strong> ' + idealDesc + '</p>' +
-        '</div>'
-      );
+    // Builds an itemised dark summary box.
+    // upfrontTotal: number or null. showCare: whether to append the monthly care row.
+    function summaryBox(pk, addonsArr, upfrontTotal, showCare) {
+      const p = PLAN[pk];
+      let rows = '<div class="quiz-result-sum-row"><span>' + p.name + ' build</span><strong>' + p.priceDisplay + '</strong></div>';
+      addonsArr.forEach(a => {
+        rows += '<div class="quiz-result-sum-row"><span>' + a.name + '</span><strong>' + a.priceDisplay + '</strong></div>';
+      });
+      if (upfrontTotal !== null && addonsArr.length > 0) {
+        rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Upfront total</strong></span><strong>£' + upfrontTotal.toFixed(2) + '</strong></div>';
+      }
+      if (showCare && careTier) {
+        rows += '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + careTier.name + '</span><strong>' + careTier.priceDisplay + '</strong></div>';
+      }
+      return '<div class="quiz-result-summary-box">' + rows + '</div>';
     }
 
-    // Care plan box (right column)
+    // Builds a features list for any plan key
+    function featuresList(pk) {
+      return '<ul class="quiz-result-list">' + PLAN[pk].features.map(f => '<li>' + f + '</li>').join('') + '</ul>';
+    }
+
+    // Builds the add-on description cards
+    function addonsBlock(addonsArr) {
+      if (!addonsArr.length) return '';
+      return addonsArr.map(a =>
+        '<div class="quiz-result-addon">' +
+          '<div class="quiz-result-addon-row">' +
+            '<span class="quiz-result-addon-name">' + a.name + '</span>' +
+            '<span class="quiz-result-addon-price">' + a.priceDisplay + '</span>' +
+          '</div>' +
+          '<p class="quiz-result-addon-desc">' + a.desc + '</p>' +
+        '</div>'
+      ).join('');
+    }
+
+    // What was dropped/downgraded to meet budget (italic note)
+    function droppedNote(wb, idealPlanKey) {
+      const parts = [];
+      if (wb.planDowngraded) parts.push(PLAN[idealPlanKey].name + ' switched to Starter');
+      if (wb.dropped.length)  parts.push(wb.dropped.join(' and ') + ' not included');
+      return parts.length
+        ? '<p class="quiz-result-rec-note">' + parts.join('; ') + ' to fit your budget.</p>'
+        : '';
+    }
+
     const careHtml = careTier
       ? '<div class="quiz-result-care-box">' +
-          '<div class="quiz-result-care-name">' +
-            careTier.name +
-            '<span class="quiz-result-care-price">' + careTier.priceDisplay + '</span>' +
-          '</div>' +
+          '<div class="quiz-result-care-name">' + careTier.name + '<span class="quiz-result-care-price">' + careTier.priceDisplay + '</span></div>' +
           '<p class="quiz-result-care-reason">' + careTier.desc + '</p>' +
         '</div>'
       : '';
 
-    // Dark investment summary
-    const buildRow  = '<div class="quiz-result-sum-row"><span>Build (' + plan.name + ')</span><strong>' + plan.priceDisplay + '</strong></div>';
-    const addonRows = addons.map(a =>
-      '<div class="quiz-result-sum-row"><span>' + a.name + '</span><strong>' + a.priceDisplay + '</strong></div>'
-    ).join('');
-    const totalRow  = (totalPrice !== null && addons.length > 0)
-      ? '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Total build</strong></span><strong>£' + totalPrice.toFixed(2) + '</strong></div>'
-      : '';
-    const careRow   = careTier
-      ? '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + careTier.name + '</span><strong>' + careTier.priceDisplay + '</strong></div>'
-      : '';
+    const ctasHtml =
+      '<div class="quiz-result-ctas">' +
+        '<a href="index.html#contact" class="btn btn-dark btn-block">Get in touch &rarr;</a>' +
+        '<a href="pricing.html" class="btn btn-ghost btn-block btn-sm">View all pricing</a>' +
+        '<a href="quiz.html" class="quiz-restart">&larr; Start again</a>' +
+      '</div>';
 
-    quizCard.innerHTML = (
-      '<div class="quiz-results">' +
-        '<div class="quiz-result-header">' +
-          '<div class="quiz-result-badge">&#10003; Your recommended plan</div>' +
-          '<h2 class="quiz-result-title">' + plan.name + '</h2>' +
-          '<p class="quiz-result-intro">' + explanation + '</p>' +
-        '</div>' +
+    let html;
 
-        '<div class="quiz-result-body">' +
-          '<div>' +
-            '<div class="quiz-result-section">' +
-              '<span class="quiz-result-label">Your build</span>' +
-              '<div class="quiz-result-build-name">' + plan.name + '&nbsp;' + priceHtml + '</div>' +
-              '<div class="quiz-result-meta">' + plan.meta + '</div>' +
-              '<ul class="quiz-result-list">' +
-                plan.features.map(f => '<li>' + f + '</li>').join('') +
-              '</ul>' +
-            '</div>' +
-            addonsHtml +
+    if (budget) {
+      // ── Two-recommendation layout ─────────────────────────────
+      const wb = budget.withinBudget;
+      const wbPrice = PLAN[wb.planKey].price;
+      const wbTotal = wbPrice !== null
+        ? wbPrice + wb.addons.reduce((s, a) => s + a.price, 0)
+        : null;
+
+      const wbCard =
+        '<div class="quiz-result-rec">' +
+          '<span class="quiz-result-rec-label">Within your budget</span>' +
+          '<h3 class="quiz-result-rec-title">' + PLAN[wb.planKey].name + '</h3>' +
+          droppedNote(wb, planKey) +
+          featuresList(wb.planKey) +
+          (wb.addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(wb.addons) + '</div>' : '') +
+          summaryBox(wb.planKey, wb.addons, wbTotal, false) +
+        '</div>';
+
+      const idealCard =
+        '<div class="quiz-result-rec quiz-result-rec--ideal">' +
+          '<span class="quiz-result-rec-label">Best for your needs</span>' +
+          '<h3 class="quiz-result-rec-title">' + plan.name + (addons.length ? ' + add-ons' : '') + '</h3>' +
+          featuresList(planKey) +
+          (addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(addons) + '</div>' : '') +
+          summaryBox(planKey, addons, totalPrice, false) +
+        '</div>';
+
+      html =
+        '<div class="quiz-results">' +
+          '<div class="quiz-result-header">' +
+            '<div class="quiz-result-badge">&#10003; Your personalised recommendation</div>' +
+            '<p class="quiz-result-intro">' + explanation + '</p>' +
           '</div>' +
+          '<div class="quiz-result-recs">' + wbCard + idealCard + '</div>' +
+          careHtml +
+          ctasHtml +
+        '</div>';
 
-          '<div class="quiz-result-right">' +
-            budgetHtml +
-            careHtml +
-            '<div class="quiz-result-summary-box">' +
-              buildRow +
-              addonRows +
-              totalRow +
-              careRow +
+    } else {
+      // ── Single recommendation layout ──────────────────────────
+      const priceHtml = plan.was
+        ? '<span class="quiz-result-build-price">' + plan.priceDisplay + '</span>&nbsp;<span class="quiz-result-build-was">was ' + plan.was + '</span>'
+        : '<span class="quiz-result-build-price">' + plan.priceDisplay + '</span>';
+
+      const addonsSection = addons.length
+        ? '<div class="quiz-result-section"><span class="quiz-result-label">Add-ons</span>' + addonsBlock(addons) + '</div>'
+        : '';
+
+      html =
+        '<div class="quiz-results">' +
+          '<div class="quiz-result-header">' +
+            '<div class="quiz-result-badge">&#10003; Your recommended plan</div>' +
+            '<h2 class="quiz-result-title">' + plan.name + '</h2>' +
+            '<p class="quiz-result-intro">' + explanation + '</p>' +
+          '</div>' +
+          '<div class="quiz-result-body">' +
+            '<div>' +
+              '<div class="quiz-result-section">' +
+                '<span class="quiz-result-label">Your build</span>' +
+                '<div class="quiz-result-build-name">' + plan.name + '&nbsp;' + priceHtml + '</div>' +
+                '<div class="quiz-result-meta">' + plan.meta + '</div>' +
+                featuresList(planKey) +
+              '</div>' +
+              addonsSection +
             '</div>' +
-            '<div class="quiz-result-ctas">' +
-              '<a href="index.html#contact" class="btn btn-dark btn-block">Get in touch &rarr;</a>' +
-              '<a href="pricing.html" class="btn btn-ghost btn-block btn-sm">View all pricing</a>' +
-              '<a href="quiz.html" class="quiz-restart">&larr; Start again</a>' +
+            '<div class="quiz-result-right">' +
+              careHtml +
+              summaryBox(planKey, addons, totalPrice, true) +
+              ctasHtml +
             '</div>' +
           '</div>' +
-        '</div>' +
-      '</div>'
-    );
+        '</div>';
+    }
+
+    quizCard.innerHTML = html;
   }
 
   // ── Boot ──────────────────────────────────────────────────────
