@@ -39,11 +39,10 @@
     {
       id: 'features',
       title: 'Do you need any of these advanced features?',
-      type: 'multi',
       options: [
-        { value: 'none',     label: 'None of these',  sub: 'Just a great website' },
         { value: 'simple',   label: 'Simple add-on',  sub: 'Live chat, newsletter signup, social feeds · £149' },
         { value: 'advanced', label: 'Advanced add-on', sub: 'Booking systems, memberships, custom integrations · £299' },
+        { value: 'none',     label: 'None of these',  sub: 'Just a great website' },
       ],
     },
     {
@@ -197,11 +196,9 @@
       }
     }
 
-    const features = Array.isArray(ans.features) ? ans.features : [];
-    if (!features.includes('none')) {
-      if (features.includes('simple'))                                list.push(ADDON.simple);
-      if (features.includes('advanced') && !hasAdvancedFromPayments) list.push(ADDON.advanced);
-    }
+    const feature = ans.features || 'none';
+    if (feature === 'simple') list.push(ADDON.simple);
+    if (feature === 'advanced' && !hasAdvancedFromPayments) list.push(ADDON.advanced);
 
     return list;
   }
