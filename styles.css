@@ -132,9 +132,9 @@ ul { padding: 0; margin: 0; list-style: none; }
 .nav {
   max-width: 1180px;
   margin: 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
   padding: 16px 24px;
   gap: 20px;
 }
@@ -161,6 +161,7 @@ ul { padding: 0; margin: 0; list-style: none; }
   font-size: 14.5px;
   font-weight: 500;
   color: var(--ink-soft);
+  justify-self: center;
 }
 .nav-links a:hover { color: var(--ink); }
 
@@ -169,11 +170,13 @@ ul { padding: 0; margin: 0; list-style: none; }
   display: inline-block;
   padding: 6px 16px;
   overflow: visible;
+  white-space: nowrap;
 }
 .nav-link-text {
   position: relative;
   z-index: 2;
   display: block;
+  white-space: nowrap;
   transition: color .3s ease;
 }
 .nav-link:hover .nav-link-text { color: #fff; }
@@ -205,8 +208,8 @@ ul { padding: 0; margin: 0; list-style: none; }
 .nav-link:hover::before { transform: scaleY(1); opacity: 1; }
 .nav-link:hover::after { transform: scaleY(1); opacity: 1; }
 
-.nav-dropdown { display: flex; align-items: center; gap: 36px; }
-.nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-dropdown { display: contents; }
+.nav-actions { display: flex; align-items: center; gap: 10px; justify-self: end; }
 .nav-toggle { display: none; }
 
 /* ---------- Hero ---------- */
