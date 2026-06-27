@@ -1236,6 +1236,33 @@ ul { padding: 0; margin: 0; list-style: none; }
 .quiz-restart { font-size: 13px; color: var(--muted); }
 .quiz-restart:hover { color: var(--ink); }
 
+/* Checkbox-style indicator for multi-select questions */
+.quiz-options--checkbox .quiz-option-check { border-radius: 4px; }
+
+/* Budget mismatch box (right column of result screen) */
+.quiz-result-budget-box {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.quiz-result-budget-box .quiz-result-label { color: #b45309; }
+.quiz-result-budget-within,
+.quiz-result-budget-ideal {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  margin: 0 0 8px;
+  line-height: 1.55;
+}
+.quiz-result-budget-ideal { margin-bottom: 0; }
+
+/* Total build row separator inside dark investment summary */
+.quiz-result-sum-total {
+  border-top: 1px solid rgba(255,255,255,.18);
+  margin-top: 4px;
+  padding-top: 11px;
+}
+
 /* Responsive */
 @media (max-width: 720px) {
   .quiz-step    { padding: 30px 22px 24px; }
