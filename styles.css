@@ -205,6 +205,7 @@ ul { padding: 0; margin: 0; list-style: none; }
 .nav-link:hover::before { transform: scaleY(1); opacity: 1; }
 .nav-link:hover::after { transform: scaleY(1); opacity: 1; }
 
+.nav-dropdown { display: flex; align-items: center; gap: 36px; }
 .nav-actions { display: flex; align-items: center; gap: 10px; }
 .nav-toggle { display: none; }
 
