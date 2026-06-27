@@ -9,7 +9,7 @@
   const QUESTIONS = [
     {
       id: 'goal',
-      title: "What’s the main goal of your website?",
+      title: "What's the main goal of your website?",
       options: [
         { value: 'showcase', label: 'Show what I do',       sub: 'A professional presence I can share with confidence' },
         { value: 'enquiries', label: 'Get enquiries',        sub: 'Attract leads and turn visitors into contacts' },
@@ -22,7 +22,7 @@
       options: [
         { value: '1-3',  label: '1–3 pages',        sub: 'Home, about, contact — the essentials' },
         { value: '5-10', label: '5–10 pages',       sub: 'Multiple services, a team page, or a blog' },
-        { value: ‘shop’, label: "Lots — it’s a shop", sub: ‘Product pages, categories, a checkout’ },
+        { value: 'shop', label: "Lots — it's a shop", sub: 'Product pages, categories, a checkout' },
       ],
     },
     {
@@ -43,7 +43,7 @@
     },
     {
       id: 'budget',
-      title: "What’s your rough budget?",
+      title: "What's your rough budget?",
       options: [
         { value: 'under500', label: 'Under £500',        sub: 'Tight budget, needs to be lean' },
         { value: '500-750',  label: '£500–£750', sub: 'Room for a solid marketing website' },
@@ -93,14 +93,14 @@
         'Order notifications',
         'Mobile-optimised checkout',
       ],
-      fallback: "An e-commerce build is exactly right for where you want to go. We’ll set up a complete online shop with a secure checkout so you can start selling straight away. Every store is a little different, so we’ll put together a custom quote once we’ve talked through the scope.",
+      fallback: "An e-commerce build is exactly right for where you want to go. We'll set up a complete online shop with a secure checkout so you can start selling straight away. Every store is a little different, so we'll put together a custom quote once we've talked through the scope.",
     },
   };
 
   const CARE_PLAN = {
     price: 'from £99.50/mo',
     was: '£199/mo',
-    reason: "You mentioned you’d like ongoing help after launch. Our monthly Care Plan covers hosting, security updates, and content changes — so your site stays in great shape without you lifting a finger.",
+    reason: "You mentioned you'd like ongoing help after launch. Our monthly Care Plan covers hosting, security updates, and content changes — so your site stays in great shape without you lifting a finger.",
   };
 
   // ── State ────────────────────────────────────────────────────

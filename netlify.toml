@@ -1,3 +1,15 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+
+# Security headers applied to every response.
+# CSP lives here (not in <meta>) so that frame-ancestors is honoured
+# and so that 'unsafe-inline' for style-src works without a second policy
+# cancelling it out.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
