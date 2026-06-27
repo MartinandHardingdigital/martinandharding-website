@@ -1236,6 +1236,15 @@ ul { padding: 0; margin: 0; list-style: none; }
 .quiz-restart { font-size: 13px; color: var(--muted); }
 .quiz-restart:hover { color: var(--ink); }
 
+/* Plan-choice prompt (shown when user clicks Get in touch with two options) */
+.quiz-plan-choice-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0 0 6px;
+}
+#quizEnquireWrap { display: flex; flex-direction: column; gap: 8px; }
+
 /* Checkbox-style indicator for multi-select questions */
 .quiz-options--checkbox .quiz-option-check { border-radius: 4px; }
 

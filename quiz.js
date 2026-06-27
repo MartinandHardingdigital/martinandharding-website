@@ -173,7 +173,7 @@
     setTimeout(() => { cb(); quizCard.style.opacity = '1'; }, 250);
   }
 
-  // ── Plan logic (pure JS, no API) ─────────────────────────────
+  // ── Plan logic ────────────────────────────────────────────────
   function pickPlan(ans) {
     if (ans.goal === 'sell' || ans.pages === 'shop' || ans.payments === 'sell_products') return 'ecommerce';
     if (ans.goal === 'above_all' || ans.payments === 'bookings' || ans.payments === 'other' || ans.pages === '5-10') return 'standard';
@@ -203,81 +203,65 @@
     return list;
   }
 
-  // ── Budget mismatch check ─────────────────────────────────────
-  // Returns null if upfront total fits the budget (or E-commerce, which has no fixed price).
-  // Returns { ideal, withinBudget } when the total exceeds the budget band.
-  // withinBudget is the best combination that fits, found by removing the most expensive
-  // add-ons first, then downgrading the plan if needed.
+  // ── Budget check — always returns both options ────────────────
+  // isMismatch=false means the ideal plan fits the budget (both cards show same plan).
+  // isMismatch=true means the ideal plan exceeds budget; withinBudget is a stripped-down option.
   function checkBudget(planKey, addons, budgetKey) {
     const buildPrice = PLAN[planKey].price;
-    if (buildPrice === null) return null; // E-commerce: skip budget check
-
     const budgetMax  = BUDGET_MAX[budgetKey] || Infinity;
     const addonTotal = addons.reduce((s, a) => s + a.price, 0);
-    const idealTotal = buildPrice + addonTotal;
-    if (idealTotal <= budgetMax) return null; // No mismatch
+    const idealTotal = buildPrice !== null ? buildPrice + addonTotal : null;
+    const ideal      = { planKey, addons, price: idealTotal };
 
-    const ideal = { planKey, addons, price: idealTotal };
+    // E-commerce has no fixed price, or plan+addons already fit
+    if (buildPrice === null || (idealTotal !== null && idealTotal <= budgetMax)) {
+      return { ideal, withinBudget: ideal, isMismatch: false };
+    }
 
-    // Sort add-ons by price descending — drop most expensive first
+    // Greedy: drop most expensive add-ons first
     const sorted = [...addons].sort((a, b) => b.price - a.price);
-
-    // Try ideal plan with progressively fewer add-ons
     for (let skip = 1; skip <= sorted.length; skip++) {
       const kept  = sorted.slice(skip);
       const total = buildPrice + kept.reduce((s, a) => s + a.price, 0);
       if (total <= budgetMax) {
-        return { ideal, withinBudget: { planKey, addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: false } };
+        return { ideal, withinBudget: { planKey, addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: false }, isMismatch: true };
       }
     }
 
-    // Plan itself exceeds budget — try Starter
+    // Try Starter plan
     if (planKey !== 'starter') {
       const sp = PLAN.starter.price;
       for (let skip = 0; skip <= sorted.length; skip++) {
         const kept  = sorted.slice(skip);
         const total = sp + kept.reduce((s, a) => s + a.price, 0);
         if (total <= budgetMax) {
-          return { ideal, withinBudget: { planKey: 'starter', addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: true } };
+          return { ideal, withinBudget: { planKey: 'starter', addons: kept, price: total, dropped: sorted.slice(0, skip).map(a => a.name), planDowngraded: true }, isMismatch: true };
         }
       }
     }
 
-    // Nothing fits — Starter alone is always the last resort
-    return { ideal, withinBudget: { planKey: 'starter', addons: [], price: PLAN.starter.price, dropped: addons.map(a => a.name), planDowngraded: planKey !== 'starter' } };
+    // Last resort: Starter alone
+    return { ideal, withinBudget: { planKey: 'starter', addons: [], price: PLAN.starter.price, dropped: addons.map(a => a.name), planDowngraded: planKey !== 'starter' }, isMismatch: true };
   }
 
   // ── Render a question ─────────────────────────────────────────
   function renderQuestion(index) {
     clearTimeout(autoAdvanceTimer);
 
-    const q       = QUESTIONS[index];
-    const isMulti = q.type === 'multi';
-    const selArr  = isMulti ? (Array.isArray(answers[q.id]) ? answers[q.id] : []) : null;
-    const selVal  = isMulti ? null : (answers[q.id] || null);
+    const q      = QUESTIONS[index];
+    const selVal = answers[q.id] || null;
 
     setProgress(((index + 1) / QUESTIONS.length) * 100);
     backBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
+    nextBtn.style.display = 'none'; // all questions auto-advance
     quizNav.style.display = '';
 
-    // Next button: hidden for single-select, "Continue" for multi-select only
-    if (isMulti) {
-      nextBtn.style.display = '';
-      nextBtn.textContent = 'Continue →';
-      nextBtn.disabled = selArr.length === 0;
-    } else {
-      nextBtn.style.display = 'none';
-    }
-
-    const isSel = val => isMulti ? selArr.includes(val) : selVal === val;
-
     const optionsHtml = q.options.map(opt => {
-      const sel = isSel(opt.value);
+      const sel = selVal === opt.value;
       return (
         '<button class="quiz-option' + (sel ? ' selected' : '') + '" ' +
           'data-value="' + opt.value + '" ' +
-          'role="' + (isMulti ? 'checkbox' : 'radio') + '" ' +
-          'aria-checked="' + sel + '" type="button">' +
+          'role="radio" aria-checked="' + sel + '" type="button">' +
           '<span class="quiz-option-check" aria-hidden="true"></span>' +
           '<span class="quiz-option-text">' +
             '<span class="quiz-option-label">' + opt.label + '</span>' +
@@ -291,64 +275,34 @@
       '<div class="quiz-step">' +
         '<span class="quiz-step-count">Question ' + (index + 1) + ' of ' + QUESTIONS.length + '</span>' +
         '<h2 class="quiz-step-title">' + q.title + '</h2>' +
-        (isMulti ? '<p class="quiz-step-sub">Select all that apply</p>' : '') +
-        '<div class="quiz-options' + (isMulti ? ' quiz-options--checkbox' : '') + '" ' +
-          'role="' + (isMulti ? 'group' : 'radiogroup') + '" aria-label="' + q.title + '">' +
+        '<div class="quiz-options" role="radiogroup" aria-label="' + q.title + '">' +
           optionsHtml +
         '</div>' +
       '</div>'
     );
 
     const btns = quizCard.querySelectorAll('.quiz-option');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        clearTimeout(autoAdvanceTimer);
+        answers[q.id] = btn.dataset.value;
 
-    if (isMulti) {
-      btns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const val   = btn.dataset.value;
-          let current = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
-
-          if (val === 'none') {
-            current = current.includes('none') ? [] : ['none'];
-          } else {
-            current = current.filter(v => v !== 'none');
-            const pos = current.indexOf(val);
-            if (pos !== -1) { current.splice(pos, 1); } else { current.push(val); }
-          }
-
-          answers[q.id] = current;
-          nextBtn.disabled = current.length === 0;
-
-          btns.forEach(b => {
-            const s = current.includes(b.dataset.value);
-            b.classList.toggle('selected', s);
-            b.setAttribute('aria-checked', s);
-          });
+        btns.forEach(b => {
+          const s = b === btn;
+          b.classList.toggle('selected', s);
+          b.setAttribute('aria-checked', s);
         });
-      });
-    } else {
-      // Single-select: auto-advance 600ms after selection
-      btns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          clearTimeout(autoAdvanceTimer);
-          answers[q.id] = btn.dataset.value;
 
-          btns.forEach(b => {
-            const s = b === btn;
-            b.classList.toggle('selected', s);
-            b.setAttribute('aria-checked', s);
-          });
-
-          autoAdvanceTimer = setTimeout(advance, 600);
-        });
+        autoAdvanceTimer = setTimeout(advance, 600);
       });
-    }
+    });
   }
 
   // ── Navigation ────────────────────────────────────────────────
   function advance() {
     clearTimeout(autoAdvanceTimer);
     const ans    = answers[QUESTIONS[currentQuestion].id];
-    const hasAns = Array.isArray(ans) ? ans.length > 0 : !!ans;
+    const hasAns = !!ans;
     if (!hasAns) return;
 
     if (currentQuestion < QUESTIONS.length - 1) {
@@ -404,24 +358,23 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          plan:       PLAN[planKey].name,
-          buildPrice: totalPrice !== null ? PLAN[planKey].priceDisplay : 'Custom quote',
-          addons:     addons.map(a => ({ name: a.name, price: a.priceDisplay })),
+          plan:         PLAN[planKey].name,
+          buildPrice:   totalPrice !== null ? PLAN[planKey].priceDisplay : 'Custom quote',
+          addons:       addons.map(a => ({ name: a.name, price: a.priceDisplay })),
           upfrontTotal: totalPrice !== null ? '£' + totalPrice.toFixed(2) : 'Custom quote',
-          careTier:   careTier ? { name: careTier.name, price: careTier.priceDisplay } : null,
+          careTier:     careTier ? { name: careTier.name, price: careTier.priceDisplay } : null,
           answers,
         }),
         signal: controller.signal,
       });
 
       clearTimeout(timeout);
-
       if (res.ok) {
         const data = await res.json();
         if (data.explanation) explanation = data.explanation;
       }
     } catch (_) {
-      // Timeout or network error — fallback explanation already set above
+      // Timeout or network error — fallback explanation already set
     }
 
     fadeTransition(() => showResult(planKey, addons, careTier, totalPrice, budget, explanation));
@@ -430,10 +383,15 @@
   // ── Result screen ─────────────────────────────────────────────
   function showResult(planKey, addons, careTier, totalPrice, budget, explanation) {
     const plan = PLAN[planKey];
+    const wb   = budget.withinBudget;
 
-    // Builds an itemised dark summary box.
-    // upfrontTotal: number or null. showCare: whether to append the monthly care row.
-    function summaryBox(pk, addonsArr, upfrontTotal, showCare) {
+    const wbBuildPrice = PLAN[wb.planKey].price;
+    const wbTotal      = wbBuildPrice !== null
+      ? wbBuildPrice + wb.addons.reduce((s, a) => s + a.price, 0)
+      : null;
+
+    // Itemised dark summary box. Always shows care row if a care plan was chosen.
+    function summaryBox(pk, addonsArr, upfrontTotal) {
       const p = PLAN[pk];
       let rows = '<div class="quiz-result-sum-row"><span>' + p.name + ' build</span><strong>' + p.priceDisplay + '</strong></div>';
       addonsArr.forEach(a => {
@@ -442,18 +400,16 @@
       if (upfrontTotal !== null && addonsArr.length > 0) {
         rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Upfront total</strong></span><strong>£' + upfrontTotal.toFixed(2) + '</strong></div>';
       }
-      if (showCare && careTier) {
+      if (careTier) {
         rows += '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + careTier.name + '</span><strong>' + careTier.priceDisplay + '</strong></div>';
       }
       return '<div class="quiz-result-summary-box">' + rows + '</div>';
     }
 
-    // Builds a features list for any plan key
     function featuresList(pk) {
       return '<ul class="quiz-result-list">' + PLAN[pk].features.map(f => '<li>' + f + '</li>').join('') + '</ul>';
     }
 
-    // Builds the add-on description cards
     function addonsBlock(addonsArr) {
       if (!addonsArr.length) return '';
       return addonsArr.map(a =>
@@ -467,16 +423,55 @@
       ).join('');
     }
 
-    // What was dropped/downgraded to meet budget (italic note)
-    function droppedNote(wb, idealPlanKey) {
+    function droppedNote() {
+      if (!wb.dropped) return '';
       const parts = [];
-      if (wb.planDowngraded) parts.push(PLAN[idealPlanKey].name + ' switched to Starter');
-      if (wb.dropped.length)  parts.push(wb.dropped.join(' and ') + ' not included');
+      if (wb.planDowngraded) parts.push(plan.name + ' switched to Starter');
+      if (wb.dropped.length)  parts.push(wb.dropped.join(' and ') + ' removed');
       return parts.length
-        ? '<p class="quiz-result-rec-note">' + parts.join('; ') + ' to fit your budget.</p>'
+        ? '<p class="quiz-result-rec-note">' + parts.join('; ') + ' to stay within budget.</p>'
         : '';
     }
 
+    // Builds the plain-text summary stored in sessionStorage for the contact form.
+    function buildPlanText(pk, addonsArr, upfrontTotal) {
+      const p = PLAN[pk];
+      const lines = ["I'd like to enquire about the following plan from your quiz:", ''];
+      lines.push(p.name + ' build — ' + p.priceDisplay);
+      addonsArr.forEach(a => lines.push(a.name + ' — ' + a.priceDisplay));
+      if (upfrontTotal !== null && addonsArr.length > 0) {
+        lines.push('Upfront total — £' + upfrontTotal.toFixed(2));
+      }
+      if (careTier) lines.push(careTier.name + ' — ' + careTier.priceDisplay);
+      return lines.join('\n');
+    }
+
+    // ── Within-budget card ──────────────────────────────────────
+    const wbNote = budget.isMismatch
+      ? droppedNote()
+      : '<p class="quiz-result-rec-note">Great news — your best option also fits within your budget.</p>';
+
+    const wbCard =
+      '<div class="quiz-result-rec">' +
+        '<span class="quiz-result-rec-label">Within your budget</span>' +
+        '<h3 class="quiz-result-rec-title">' + PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '') + '</h3>' +
+        wbNote +
+        featuresList(wb.planKey) +
+        (wb.addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(wb.addons) + '</div>' : '') +
+        summaryBox(wb.planKey, wb.addons, wbTotal) +
+      '</div>';
+
+    // ── Ideal card ──────────────────────────────────────────────
+    const idealCard =
+      '<div class="quiz-result-rec quiz-result-rec--ideal">' +
+        '<span class="quiz-result-rec-label">Best for your needs</span>' +
+        '<h3 class="quiz-result-rec-title">' + plan.name + (addons.length ? ' + add-ons' : '') + '</h3>' +
+        featuresList(planKey) +
+        (addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(addons) + '</div>' : '') +
+        summaryBox(planKey, addons, totalPrice) +
+      '</div>';
+
+    // ── Care description box ────────────────────────────────────
     const careHtml = careTier
       ? '<div class="quiz-result-care-box">' +
           '<div class="quiz-result-care-name">' + careTier.name + '<span class="quiz-result-care-price">' + careTier.priceDisplay + '</span></div>' +
@@ -484,90 +479,51 @@
         '</div>'
       : '';
 
-    const ctasHtml =
-      '<div class="quiz-result-ctas">' +
-        '<a href="index.html#contact" class="btn btn-dark btn-block">Get in touch &rarr;</a>' +
-        '<a href="pricing.html" class="btn btn-ghost btn-block btn-sm">View all pricing</a>' +
-        '<a href="quiz.html" class="quiz-restart">&larr; Start again</a>' +
+    const html =
+      '<div class="quiz-results">' +
+        '<div class="quiz-result-header">' +
+          '<div class="quiz-result-badge">✓ Your personalised recommendation</div>' +
+          '<p class="quiz-result-intro">' + explanation + '</p>' +
+        '</div>' +
+        '<div class="quiz-result-recs">' + wbCard + idealCard + '</div>' +
+        careHtml +
+        '<div class="quiz-result-ctas">' +
+          '<div id="quizEnquireWrap">' +
+            '<button type="button" class="btn btn-dark btn-block" id="quizEnquireBtn">Get in touch →</button>' +
+          '</div>' +
+          '<a href="pricing.html" class="btn btn-ghost btn-block btn-sm">View all pricing</a>' +
+          '<a href="quiz.html" class="quiz-restart">← Start again</a>' +
+        '</div>' +
       '</div>';
 
-    let html;
-
-    if (budget) {
-      // ── Two-recommendation layout ─────────────────────────────
-      const wb = budget.withinBudget;
-      const wbPrice = PLAN[wb.planKey].price;
-      const wbTotal = wbPrice !== null
-        ? wbPrice + wb.addons.reduce((s, a) => s + a.price, 0)
-        : null;
-
-      const wbCard =
-        '<div class="quiz-result-rec">' +
-          '<span class="quiz-result-rec-label">Within your budget</span>' +
-          '<h3 class="quiz-result-rec-title">' + PLAN[wb.planKey].name + '</h3>' +
-          droppedNote(wb, planKey) +
-          featuresList(wb.planKey) +
-          (wb.addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(wb.addons) + '</div>' : '') +
-          summaryBox(wb.planKey, wb.addons, wbTotal, false) +
-        '</div>';
-
-      const idealCard =
-        '<div class="quiz-result-rec quiz-result-rec--ideal">' +
-          '<span class="quiz-result-rec-label">Best for your needs</span>' +
-          '<h3 class="quiz-result-rec-title">' + plan.name + (addons.length ? ' + add-ons' : '') + '</h3>' +
-          featuresList(planKey) +
-          (addons.length ? '<div class="quiz-result-rec-addons">' + addonsBlock(addons) + '</div>' : '') +
-          summaryBox(planKey, addons, totalPrice, false) +
-        '</div>';
-
-      html =
-        '<div class="quiz-results">' +
-          '<div class="quiz-result-header">' +
-            '<div class="quiz-result-badge">&#10003; Your personalised recommendation</div>' +
-            '<p class="quiz-result-intro">' + explanation + '</p>' +
-          '</div>' +
-          '<div class="quiz-result-recs">' + wbCard + idealCard + '</div>' +
-          careHtml +
-          ctasHtml +
-        '</div>';
-
-    } else {
-      // ── Single recommendation layout ──────────────────────────
-      const priceHtml = plan.was
-        ? '<span class="quiz-result-build-price">' + plan.priceDisplay + '</span>&nbsp;<span class="quiz-result-build-was">was ' + plan.was + '</span>'
-        : '<span class="quiz-result-build-price">' + plan.priceDisplay + '</span>';
-
-      const addonsSection = addons.length
-        ? '<div class="quiz-result-section"><span class="quiz-result-label">Add-ons</span>' + addonsBlock(addons) + '</div>'
-        : '';
-
-      html =
-        '<div class="quiz-results">' +
-          '<div class="quiz-result-header">' +
-            '<div class="quiz-result-badge">&#10003; Your recommended plan</div>' +
-            '<h2 class="quiz-result-title">' + plan.name + '</h2>' +
-            '<p class="quiz-result-intro">' + explanation + '</p>' +
-          '</div>' +
-          '<div class="quiz-result-body">' +
-            '<div>' +
-              '<div class="quiz-result-section">' +
-                '<span class="quiz-result-label">Your build</span>' +
-                '<div class="quiz-result-build-name">' + plan.name + '&nbsp;' + priceHtml + '</div>' +
-                '<div class="quiz-result-meta">' + plan.meta + '</div>' +
-                featuresList(planKey) +
-              '</div>' +
-              addonsSection +
-            '</div>' +
-            '<div class="quiz-result-right">' +
-              careHtml +
-              summaryBox(planKey, addons, totalPrice, true) +
-              ctasHtml +
-            '</div>' +
-          '</div>' +
-        '</div>';
-    }
-
     quizCard.innerHTML = html;
+
+    // ── Wire up enquiry CTA ────────────────────────────────────
+    document.getElementById('quizEnquireBtn').addEventListener('click', () => {
+      if (budget.isMismatch) {
+        const wrap = document.getElementById('quizEnquireWrap');
+        const wbLabel   = PLAN[wb.planKey].name + (wb.addons.length ? ' (budget option)' : '');
+        const idealLabel = plan.name + (addons.length ? ' + add-ons' : '') + ' (best option)';
+        wrap.innerHTML =
+          '<p class="quiz-plan-choice-label">Which plan would you like to enquire about?</p>' +
+          '<button type="button" class="btn btn-ghost btn-block quiz-plan-choice" data-which="within">Enquire about ' + wbLabel + '</button>' +
+          '<button type="button" class="btn btn-dark btn-block quiz-plan-choice" data-which="ideal">Enquire about ' + idealLabel + '</button>';
+
+        wrap.querySelectorAll('.quiz-plan-choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const which = btn.dataset.which;
+            const pk    = which === 'within' ? wb.planKey : planKey;
+            const ao    = which === 'within' ? wb.addons  : addons;
+            const tot   = which === 'within' ? wbTotal    : totalPrice;
+            sessionStorage.setItem('quizPlan', buildPlanText(pk, ao, tot));
+            window.location.href = 'index.html#contact';
+          });
+        });
+      } else {
+        sessionStorage.setItem('quizPlan', buildPlanText(planKey, addons, totalPrice));
+        window.location.href = 'index.html#contact';
+      }
+    });
   }
 
   // ── Boot ──────────────────────────────────────────────────────

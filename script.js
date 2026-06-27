@@ -27,10 +27,32 @@ const form = document.getElementById('contactForm');
 const note = document.getElementById('formNote');
 
 if (form) {
-  form.addEventListener('submit', (e) => {
+  // Pre-fill message textarea when arriving from the quiz plan finder
+  const savedPlan  = sessionStorage.getItem('quizPlan');
+  const messageField = document.getElementById('message');
+  if (savedPlan && messageField) {
+    messageField.value = savedPlan;
+    sessionStorage.removeItem('quizPlan');
+  }
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    note.textContent = "Thanks! We'll be in touch within one business day.";
-    form.reset();
+    const submitBtn = form.querySelector('[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(form)).toString(),
+      });
+      note.textContent = "Thanks! We'll be in touch within one business day.";
+      form.reset();
+    } catch (_) {
+      note.textContent = 'Something went wrong. Please email us at contact@martinandharding.co.uk';
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
   });
 }
 
