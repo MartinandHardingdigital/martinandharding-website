@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://api.anthropic.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="description" content="Answer 5 quick questions and our AI will recommend the perfect website package, integrations, and care plan for your business — with full pricing.">
-<meta property="og:title" content="Find Your Perfect Plan — Martin & Harding Digital">
-<meta property="og:description" content="5 questions. AI-powered recommendation. Get a full plan with pricing in under 2 minutes.">
+<meta name="description" content="Answer 5 quick questions and get an AI-powered recommendation for the perfect Martin &amp; Harding Digital website plan for your business.">
+<meta property="og:title" content="Find Your Perfect Plan — Martin &amp; Harding Digital">
+<meta property="og:description" content="5 questions. Instant AI recommendation. Get a personalised website plan in under 2 minutes.">
 <meta property="og:type" content="website">
-<title>Find Your Perfect Plan — Martin & Harding Digital</title>
+<title>Find Your Perfect Plan — Martin &amp; Harding Digital</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314161a'/%3E%3Ctext x='32' y='40' font-family='Arial, sans-serif' font-size='22' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EM%26H%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,29 +49,31 @@
   <section class="hero quiz-hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="container hero-inner">
-      <span class="badge reveal">AI-powered plan finder</span>
+      <span class="badge reveal">&#10022; AI-powered plan finder</span>
       <h1 class="reveal">Find your <span class="highlight">perfect plan</span></h1>
-      <p class="hero-sub reveal">Answer 5 quick questions. Our AI will recommend the right build, integrations, and care plan — with full pricing included.</p>
+      <p class="hero-sub reveal">Answer 5 quick questions and we'll recommend the right package for your business — with a personalised explanation.</p>
     </div>
   </section>
 
   <section class="quiz-section">
     <div class="container">
-      <div class="quiz-wrap" id="quizWrap">
+      <div class="quiz-wrap">
 
-        <div class="quiz-progress-wrap">
-          <div class="quiz-progress" id="quizProgress">
-            <div class="quiz-progress-bar" id="quizProgressBar"></div>
-          </div>
+        <div class="quiz-progress-wrap" role="progressbar" aria-label="Quiz progress">
+          <div class="quiz-progress-bar" id="quizProgressBar"></div>
         </div>
 
-        <div class="quiz-card" id="quizCard">
+        <div class="quiz-card" id="quizCard" aria-live="polite">
           <!-- Populated by quiz.js -->
         </div>
 
         <div class="quiz-nav" id="quizNav">
-          <button class="btn btn-ghost quiz-back-btn" id="quizBack" aria-label="Go back">← Back</button>
-          <button class="btn btn-dark" id="quizNext" disabled style="opacity:.45">Next →</button>
+          <button type="button" class="btn btn-ghost btn-sm quiz-back-btn" id="quizBackBtn" style="visibility:hidden">
+            &larr; Back
+          </button>
+          <button type="button" class="btn btn-dark" id="quizNextBtn" disabled>
+            Next &rarr;
+          </button>
         </div>
 
       </div>
@@ -90,7 +92,6 @@
       <a href="index.html#services">Services</a>
       <a href="index.html#work">Work</a>
       <a href="pricing.html">Pricing</a>
-      <a href="quiz.html">Find my plan</a>
       <a href="index.html#contact">Contact</a>
       <a href="privacy.html">Privacy</a>
     </div>
