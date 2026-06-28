@@ -521,7 +521,7 @@
         rows += '<div class="quiz-result-sum-row"><span>' + a.name + '</span><strong>' + a.priceDisplay + '</strong></div>';
       });
       if (arr.length > 0) {
-        rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Upfront total</strong></span><strong>£' + upfront.toFixed(2) + '</strong></div>';
+        rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Estimated upfront total</strong></span><strong>£' + upfront.toFixed(2) + '</strong></div>';
       }
       if (careTier) {
         rows += '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + careTier.name + '</span><strong>' + careTier.priceDisplay + '</strong></div>';
@@ -560,11 +560,11 @@
       var p     = PLAN[pk];
       var items = [{ label: p.name + ' build', value: p.priceDisplay }];
       arr.forEach(function (a) { items.push({ label: a.name, value: a.priceDisplay }); });
-      if (arr.length > 0) items.push({ label: 'Upfront total', value: '£' + upfront.toFixed(2), isTotal: true });
+      if (arr.length > 0) items.push({ label: ‘Estimated upfront total’, value: ‘£’ + upfront.toFixed(2), isTotal: true });
       if (careTier)       items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
 
-      var lines = ["I’d like to enquire about the following plan from your quiz:", ''];
-      items.forEach(function (item) { lines.push(item.label + ' — ' + item.value); });
+      var lines = [‘Estimated plan from website quiz (subject to confirmation):’, ‘’];
+      items.forEach(function (item) { lines.push(item.label + ‘ — ‘ + item.value); });
 
       return JSON.stringify({ items: items, text: lines.join('\n') });
     }
@@ -638,6 +638,7 @@
         '</div>' +
         recsHtml +
         careHtml +
+        '<p class="quiz-result-disclaimer">This is an estimate to give you a clear starting point, based on what you\'ve told us. The final price may shift slightly once we\'ve had a proper chat about your project and the details — sometimes things turn out simpler than expected, sometimes there\'s a bit more to it. Either way, there are no surprises: we\'ll always confirm everything with you in writing before any work begins.</p>' +
         ctasHtml +
       '</div>';
 

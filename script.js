@@ -54,7 +54,8 @@ if (form) {
 
       // Render the dark itemised breakdown
       if (planSummary) {
-        planSummary.innerHTML = planData.items.map(item => {
+        const headerRow = '<div class="quiz-plan-header">Estimated plan from website quiz (subject to confirmation):</div>';
+        planSummary.innerHTML = headerRow + planData.items.map(item => {
           let cls = 'quiz-plan-row';
           if (item.isTotal) cls += ' quiz-plan-row--total';
           if (item.isMrr)   cls += ' quiz-plan-row--mrr';
