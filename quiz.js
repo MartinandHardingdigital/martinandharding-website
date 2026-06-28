@@ -560,11 +560,11 @@
       var p     = PLAN[pk];
       var items = [{ label: p.name + ' build', value: p.priceDisplay }];
       arr.forEach(function (a) { items.push({ label: a.name, value: a.priceDisplay }); });
-      if (arr.length > 0) items.push({ label: ‘Estimated upfront total’, value: ‘£’ + upfront.toFixed(2), isTotal: true });
+      if (arr.length > 0) items.push({ label: 'Estimated upfront total', value: '£' + upfront.toFixed(2), isTotal: true });
       if (careTier)       items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
 
-      var lines = [‘Estimated plan from website quiz (subject to confirmation):’, ‘’];
-      items.forEach(function (item) { lines.push(item.label + ‘ — ‘ + item.value); });
+      var lines = ['Estimated plan from website quiz (subject to confirmation):', ''];
+      items.forEach(function (item) { lines.push(item.label + ' — ' + item.value); });
 
       return JSON.stringify({ items: items, text: lines.join('\n') });
     }
