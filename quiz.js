@@ -16,12 +16,13 @@
     {
       id: 'goal',
       type: 'multi',
+      noneValue: 'above_all',
       title: "What's the main goal of your website?",
       options: [
         { value: 'showcase',  label: 'Show what I do',      sub: 'A professional presence I can share with confidence' },
         { value: 'enquiries', label: 'Get enquiries',        sub: 'Attract leads and turn visitors into contacts' },
         { value: 'sell',      label: 'Sell products online', sub: 'Take orders and payments through my website' },
-        { value: 'above_all', label: 'Above all of these',   sub: 'All of the above — I need a full-featured site' },
+        { value: 'above_all', label: 'All of the above',    sub: 'All of the above — I need a full-featured site' },
       ],
     },
     {
@@ -346,13 +347,9 @@
     backBtn.style.visibility = getPrevIndex(index) < 0 ? 'hidden' : 'visible';
     quizNav.style.display    = '';
 
-    if (isMulti) {
-      nextBtn.style.display  = '';
-      nextBtn.textContent    = 'Continue →';
-      nextBtn.disabled       = selArr.length === 0;
-    } else {
-      nextBtn.style.display  = 'none';
-    }
+    nextBtn.style.display = '';
+    nextBtn.textContent   = 'Continue →';
+    nextBtn.disabled      = isMulti ? selArr.length === 0 : !selVal;
 
     var isSel = function (val) { return isMulti ? selArr.includes(val) : selVal === val; };
 
@@ -414,16 +411,14 @@
     } else {
       btns.forEach(function (btn) {
         btn.addEventListener('click', function () {
-          clearTimeout(autoAdvanceTimer);
           answers[q.id] = btn.dataset.value;
+          nextBtn.disabled = false;
 
           btns.forEach(function (b) {
             var s = b === btn;
             b.classList.toggle('selected', s);
             b.setAttribute('aria-checked', s);
           });
-
-          autoAdvanceTimer = setTimeout(advance, 600);
         });
       });
     }
