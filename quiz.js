@@ -6,9 +6,16 @@
 
   const QUIZ_ENDPOINT = '/.netlify/functions/quiz';
 
+  // ── Questions ─────────────────────────────────────────────────
+  // type:'multi' → multi-select with Continue button.
+  // No type (or type:'single') → single-select with auto-advance.
+  // noneValue → the option that is mutually exclusive with all others.
+  // conditional(ans) → function returning false means this step is skipped.
+
   const QUESTIONS = [
     {
       id: 'goal',
+      type: 'multi',
       title: "What's the main goal of your website?",
       options: [
         { value: 'showcase',  label: 'Show what I do',      sub: 'A professional presence I can share with confidence' },
@@ -28,31 +35,64 @@
     },
     {
       id: 'payments',
+      type: 'multi',
+      noneValue: 'no',
       title: 'Do you need to take payments on the site?',
       options: [
-        { value: 'no',            label: 'No',                                                    sub: 'No payments needed' },
         { value: 'sell_products', label: 'Yes — selling products (a shop)',                  sub: 'Full online shop with checkout' },
         { value: 'bookings',      label: 'Yes — taking payment for bookings or appointments', sub: 'Clients pay to book slots or services' },
         { value: 'other',         label: 'Yes — something else',                             sub: 'Deposits, one-off payments, or similar' },
+        { value: 'no',            label: 'No — no payments needed',                          sub: 'Payments not required' },
       ],
     },
     {
-      id: 'features',
-      title: 'Do you need any of these advanced features?',
+      id: 'addonTypes',
+      type: 'multi',
+      noneValue: 'none',
+      title: 'Do you need any advanced features or integrations?',
       options: [
-        { value: 'simple',   label: 'Simple add-on',  sub: 'Live chat, newsletter signup, social feeds · £149' },
-        { value: 'advanced', label: 'Advanced add-on', sub: 'Booking systems, memberships, custom integrations · £299' },
-        { value: 'none',     label: 'None of these',  sub: 'Just a great website' },
+        { value: 'simple',   label: 'Simple add-ons',   sub: 'Live chat, newsletter signup, social feeds, cookie consent' },
+        { value: 'advanced', label: 'Advanced add-ons', sub: 'Booking systems, memberships, CRM or custom form setup' },
+        { value: 'none',     label: 'None of these',    sub: 'Just a great website' },
+      ],
+    },
+    {
+      id: 'simpleAddons',
+      type: 'multi',
+      title: 'Which simple features do you need?',
+      conditional: function (ans) {
+        var t = Array.isArray(ans.addonTypes) ? ans.addonTypes : [];
+        return t.includes('simple') && !t.includes('none');
+      },
+      options: [
+        { value: 'live_chat',      label: 'Live chat',              sub: 'Chat widget so visitors can message you directly · £79' },
+        { value: 'newsletter',     label: 'Newsletter signup',       sub: 'Email capture connected to Mailchimp or similar · £69' },
+        { value: 'social_feed',    label: 'Social media feed',       sub: 'Display your Instagram or Facebook feed on the site · £69' },
+        { value: 'cookie_consent', label: 'Cookie consent banner',  sub: 'GDPR-compliant cookie notice and preference manager · £49' },
+      ],
+    },
+    {
+      id: 'advancedAddons',
+      type: 'multi',
+      title: 'Which advanced features do you need?',
+      conditional: function (ans) {
+        var t = Array.isArray(ans.addonTypes) ? ans.addonTypes : [];
+        return t.includes('advanced') && !t.includes('none');
+      },
+      options: [
+        { value: 'booking_system', label: 'Booking / appointment system', sub: 'Let clients book slots or appointments online · £199' },
+        { value: 'membership',     label: 'Membership & gated content',   sub: 'Private pages, login areas, or member-only sections · £199' },
+        { value: 'crm_forms',      label: 'CRM or custom form setup',     sub: 'Complex forms, lead routing, or CRM integration · £149' },
       ],
     },
     {
       id: 'care',
       title: 'Do you want us to look after the site after launch?',
       options: [
-        { value: 'no',      label: 'No, just build it',                          sub: "I'll handle updates myself" },
         { value: 'light',   label: 'Yes — light touch',                     sub: 'Occasional small fixes · £99/month' },
         { value: 'regular', label: 'Yes — regular updates and support',     sub: 'Ongoing updates and help · £149/month' },
         { value: 'full',    label: 'Yes — full ongoing growth, SEO and content', sub: 'Full service, SEO, content · £399/month' },
+        { value: 'no',      label: 'No, just build it',                          sub: "I'll handle updates myself" },
       ],
     },
     {
@@ -74,13 +114,7 @@
       priceDisplay: '£399.50',
       was: '£799',
       meta: '1–3 pages · launches in 3–5 days',
-      features: [
-        'Clean, mobile-friendly design',
-        'Contact form',
-        'Basic SEO setup',
-        'Google Analytics',
-        'SSL included',
-      ],
+      features: ['Clean, mobile-friendly design', 'Contact form', 'Basic SEO setup', 'Google Analytics', 'SSL included'],
       fallback: "Based on your answers, our Starter package is a great fit. It gives you everything you need for a professional online presence — clean design, mobile-friendly, and live in just a few days.",
     },
     standard: {
@@ -89,13 +123,7 @@
       priceDisplay: '£599.50',
       was: '£1,199',
       meta: '5–10 pages · launches in 5–7 days',
-      features: [
-        'Everything in Starter',
-        'Multiple service or product pages',
-        'Contact forms with lead capture',
-        'On-page SEO foundations',
-        'Blog-ready',
-      ],
+      features: ['Everything in Starter', 'Multiple service or product pages', 'Contact forms with lead capture', 'On-page SEO foundations', 'Blog-ready'],
       fallback: "Our Standard package is the right fit for where you want to go. You get a full marketing website with multiple pages, proper SEO foundations, and contact forms built to convert visitors into enquiries.",
     },
     ecommerce: {
@@ -104,43 +132,41 @@
       priceDisplay: '£899.50',
       was: '£1,799',
       meta: 'Online shop · launches in 7–10 days',
-      features: [
-        'Full online shop setup',
-        'Secure checkout & card payments',
-        'Product management',
-        'Order notifications',
-        'Mobile-optimised checkout',
-      ],
+      features: ['Full online shop setup', 'Secure checkout & card payments', 'Product management', 'Order notifications', 'Mobile-optimised checkout'],
       fallback: "An e-commerce build is exactly right for where you want to go. We'll set up a complete online shop with a secure checkout so you can start selling straight away.",
     },
   };
 
-  // ── Add-on catalogue ──────────────────────────────────────────
+  // ── Payment-triggered add-ons ─────────────────────────────────
+  // Added automatically based on the payments Q; E-commerce plan has these built in.
   const ADDON = {
-    simple: {
-      name: 'Simple add-on',
-      price: 149,
-      priceDisplay: '£149',
-      desc: 'Live chat, newsletter signup, or social feed integration',
-    },
-    advanced: {
-      name: 'Advanced add-on',
-      price: 299,
-      priceDisplay: '£299',
-      desc: 'Booking/reservation system, memberships, or custom integration',
-    },
     booking_payment: {
       name: 'Booking system + payments',
-      price: 299,
-      priceDisplay: '£299',
+      price: 299, priceDisplay: '£299',
       desc: 'Booking/reservation system with integrated payment processing',
     },
     payment_integration: {
       name: 'Payment integration',
-      price: 299,
-      priceDisplay: '£299',
+      price: 299, priceDisplay: '£299',
       desc: 'Custom payment flow for deposits, one-off charges, or similar',
     },
+  };
+
+  // ── Simple add-ons checklist ──────────────────────────────────
+  const SIMPLE_ADDONS = {
+    live_chat:      { name: 'Live chat',             price: 79,  priceDisplay: '£79',  desc: 'Chat widget so visitors can message you directly from your website' },
+    newsletter:     { name: 'Newsletter signup',      price: 69,  priceDisplay: '£69',  desc: 'Email capture form connected to Mailchimp, ConvertKit, or similar' },
+    social_feed:    { name: 'Social media feed',      price: 69,  priceDisplay: '£69',  desc: 'Display your Instagram or Facebook feed automatically on your site' },
+    cookie_consent: { name: 'Cookie consent banner', price: 49,  priceDisplay: '£49',  desc: 'GDPR-compliant cookie notice and preference manager' },
+  };
+
+  // ── Advanced add-ons checklist ────────────────────────────────
+  // guardPayment: if this payment type was selected in the payments Q,
+  // skip this add-on (it is already covered by ADDON.booking_payment).
+  const ADVANCED_ADDONS = {
+    booking_system: { name: 'Booking / appointment system', price: 199, priceDisplay: '£199', desc: 'Let clients book appointments or slots online, with email confirmations', guardPayment: 'bookings' },
+    membership:     { name: 'Membership & gated content',   price: 199, priceDisplay: '£199', desc: 'Private pages, login areas, or member-only sections of your site' },
+    crm_forms:      { name: 'CRM or custom form setup',     price: 149, priceDisplay: '£149', desc: 'Complex multi-step forms, lead routing, or integration with your CRM' },
   };
 
   // ── Care tiers ────────────────────────────────────────────────
@@ -170,80 +196,117 @@
 
   function fadeTransition(cb) {
     quizCard.style.opacity = '0';
-    setTimeout(() => { cb(); quizCard.style.opacity = '1'; }, 250);
+    setTimeout(function () { cb(); quizCard.style.opacity = '1'; }, 250);
+  }
+
+  // ── Conditional navigation ────────────────────────────────────
+  // Returns the index of the next visible question, skipping conditionals that don't apply.
+  function getNextIndex(from) {
+    var next = from + 1;
+    while (next < QUESTIONS.length) {
+      var q = QUESTIONS[next];
+      if (!q.conditional || q.conditional(answers)) break;
+      next++;
+    }
+    return next; // === QUESTIONS.length means we've reached the end → call finish()
+  }
+
+  // Returns the index of the previous visible question, or -1 if we're at the start.
+  function getPrevIndex(from) {
+    var prev = from - 1;
+    while (prev >= 0) {
+      var q = QUESTIONS[prev];
+      if (!q.conditional || q.conditional(answers)) break;
+      prev--;
+    }
+    return prev;
   }
 
   // ── Plan selection ────────────────────────────────────────────
   function pickPlan(ans) {
-    if (ans.goal === 'sell' || ans.pages === 'shop' || ans.payments === 'sell_products') return 'ecommerce';
-    if (ans.goal === 'above_all' || ans.payments === 'bookings' || ans.payments === 'other' || ans.pages === '5-10') return 'standard';
-    if (ans.pages === '1-3') return 'starter';
+    var goals    = Array.isArray(ans.goal)     ? ans.goal     : [ans.goal].filter(Boolean);
+    var payments = Array.isArray(ans.payments) ? ans.payments : [ans.payments].filter(Boolean);
+
+    if (goals.includes('sell') || ans.pages === 'shop' || payments.includes('sell_products'))
+      return 'ecommerce';
+    if (goals.includes('above_all') || payments.includes('bookings') || payments.includes('other') || ans.pages === '5-10')
+      return 'standard';
+    if (ans.pages === '1-3')
+      return 'starter';
     return 'standard';
   }
 
   // ── Add-on selection ──────────────────────────────────────────
   function buildAddons(ans, planKey) {
-    const list = [];
-    let hasAdvancedFromPayments = false;
+    var list     = [];
+    var payments = Array.isArray(ans.payments)  ? ans.payments  : [];
+    var types    = Array.isArray(ans.addonTypes) ? ans.addonTypes : [];
 
+    // Payment-triggered add-ons (E-commerce plan already includes these)
     if (planKey !== 'ecommerce') {
-      if (ans.payments === 'bookings') {
-        list.push(ADDON.booking_payment);
-        hasAdvancedFromPayments = true;
-      } else if (ans.payments === 'other') {
-        list.push(ADDON.payment_integration);
-        hasAdvancedFromPayments = true;
-      }
+      if (payments.includes('bookings')) list.push(ADDON.booking_payment);
+      if (payments.includes('other'))    list.push(ADDON.payment_integration);
     }
 
-    const feature = ans.features || 'none';
-    if (feature === 'simple') list.push(ADDON.simple);
-    if (feature === 'advanced' && !hasAdvancedFromPayments) list.push(ADDON.advanced);
+    // Checklist add-ons (only when types is not 'none')
+    if (!types.includes('none')) {
+      if (types.includes('simple')) {
+        var simSel = Array.isArray(ans.simpleAddons) ? ans.simpleAddons : [];
+        simSel.forEach(function (key) {
+          if (SIMPLE_ADDONS[key]) list.push(SIMPLE_ADDONS[key]);
+        });
+      }
+
+      if (types.includes('advanced')) {
+        var advSel = Array.isArray(ans.advancedAddons) ? ans.advancedAddons : [];
+        advSel.forEach(function (key) {
+          var addon = ADVANCED_ADDONS[key];
+          if (!addon) return;
+          // Double-count guard: skip if this feature is already covered by a payment add-on
+          if (addon.guardPayment && payments.includes(addon.guardPayment)) return;
+          list.push(addon);
+        });
+      }
+    }
 
     return list;
   }
 
   // ── Budget check ──────────────────────────────────────────────
   // Always returns { ideal, withinBudget, isMismatch }.
-  // isMismatch=false: ideal plan fits budget — withinBudget === ideal, show one card.
-  // isMismatch=true: budget exceeded — withinBudget is a stripped-down option, show two cards.
-  //
-  // Greedy cascade: try current plan with fewer add-ons, then Standard (if ideal was E-commerce),
-  // then Starter. Always produces a real calculated price.
+  // isMismatch=false → one card; isMismatch=true → two cards.
+  // Greedy cascade: drop most-expensive add-ons first, then try a cheaper plan tier.
   function checkBudget(planKey, addons, budgetKey) {
-    const budgetMax  = BUDGET_MAX[budgetKey] || Infinity;
-    const buildPrice = PLAN[planKey].price;
-    const addonTotal = addons.reduce((s, a) => s + a.price, 0);
-    const idealTotal = buildPrice + addonTotal;
-    const ideal      = { planKey, addons, price: idealTotal };
+    var budgetMax  = BUDGET_MAX[budgetKey] || Infinity;
+    var buildPrice = PLAN[planKey].price;
+    var addonTotal = addons.reduce(function (s, a) { return s + a.price; }, 0);
+    var idealTotal = buildPrice + addonTotal;
+    var ideal      = { planKey: planKey, addons: addons, price: idealTotal };
 
     if (idealTotal <= budgetMax) {
-      return { ideal, withinBudget: ideal, isMismatch: false };
+      return { ideal: ideal, withinBudget: ideal, isMismatch: false };
     }
 
-    // Order of plans to attempt when dropping budget, from most to least expensive
-    const planOrder  = ['ecommerce', 'standard', 'starter'];
-    const startIdx   = planOrder.indexOf(planKey);
-    // Sort add-ons descending by price so we drop the most expensive first
-    const sorted     = [...addons].sort((a, b) => b.price - a.price);
+    var planOrder = ['ecommerce', 'standard', 'starter'];
+    var startIdx  = planOrder.indexOf(planKey);
+    var sorted    = addons.slice().sort(function (a, b) { return b.price - a.price; });
 
-    for (let pi = startIdx; pi < planOrder.length; pi++) {
-      const tryKey   = planOrder[pi];
-      const tryPrice = PLAN[tryKey].price;
-      // For the current plan we already know skip=0 fails, so start from 1
-      const minSkip  = pi === startIdx ? 1 : 0;
+    for (var pi = startIdx; pi < planOrder.length; pi++) {
+      var tryKey   = planOrder[pi];
+      var tryPrice = PLAN[tryKey].price;
+      var minSkip  = pi === startIdx ? 1 : 0;
 
-      for (let skip = minSkip; skip <= sorted.length; skip++) {
-        const kept  = sorted.slice(skip);
-        const total = tryPrice + kept.reduce((s, a) => s + a.price, 0);
+      for (var skip = minSkip; skip <= sorted.length; skip++) {
+        var kept  = sorted.slice(skip);
+        var total = tryPrice + kept.reduce(function (s, a) { return s + a.price; }, 0);
         if (total <= budgetMax) {
           return {
-            ideal,
+            ideal: ideal,
             withinBudget: {
               planKey:       tryKey,
               addons:        kept,
               price:         total,
-              dropped:       sorted.slice(0, skip).map(a => a.name),
+              dropped:       sorted.slice(0, skip).map(function (a) { return a.name; }),
               planDowngraded: tryKey !== planKey,
             },
             isMismatch: true,
@@ -252,10 +315,9 @@
       }
     }
 
-    // Safety fallback — Starter alone always fits every tier in practice
     return {
-      ideal,
-      withinBudget: { planKey: 'starter', addons: [], price: PLAN.starter.price, dropped: addons.map(a => a.name), planDowngraded: planKey !== 'starter' },
+      ideal: ideal,
+      withinBudget: { planKey: 'starter', addons: [], price: PLAN.starter.price, dropped: addons.map(function (a) { return a.name; }), planDowngraded: planKey !== 'starter' },
       isMismatch: true,
     };
   }
@@ -264,19 +326,43 @@
   function renderQuestion(index) {
     clearTimeout(autoAdvanceTimer);
 
-    const q      = QUESTIONS[index];
-    const selVal = answers[q.id] || null;
+    var q       = QUESTIONS[index];
+    var isMulti = q.type === 'multi';
+    var selVal  = answers[q.id];
+    var selArr  = isMulti ? (Array.isArray(selVal) ? selVal : []) : null;
 
-    setProgress(((index + 1) / QUESTIONS.length) * 100);
-    backBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
-    nextBtn.style.display    = 'none'; // all questions auto-advance; no Next button shown
+    // Compute visible step numbers for display
+    var visibleStep  = 0;
+    var visibleTotal = 0;
+    for (var i = 0; i < QUESTIONS.length; i++) {
+      var vis = !QUESTIONS[i].conditional || QUESTIONS[i].conditional(answers);
+      if (vis) {
+        visibleTotal++;
+        if (i <= index) visibleStep = visibleTotal;
+      }
+    }
+
+    setProgress((index + 1) / QUESTIONS.length * 100);
+    backBtn.style.visibility = getPrevIndex(index) < 0 ? 'hidden' : 'visible';
     quizNav.style.display    = '';
 
-    const optionsHtml = q.options.map(opt => {
-      const sel = selVal === opt.value;
+    if (isMulti) {
+      nextBtn.style.display  = '';
+      nextBtn.textContent    = 'Continue →';
+      nextBtn.disabled       = selArr.length === 0;
+    } else {
+      nextBtn.style.display  = 'none';
+    }
+
+    var isSel = function (val) { return isMulti ? selArr.includes(val) : selVal === val; };
+
+    var optionsHtml = q.options.map(function (opt) {
+      var sel = isSel(opt.value);
       return (
         '<button class="quiz-option' + (sel ? ' selected' : '') + '" ' +
-          'data-value="' + opt.value + '" role="radio" aria-checked="' + sel + '" type="button">' +
+          'data-value="' + opt.value + '" ' +
+          'role="' + (isMulti ? 'checkbox' : 'radio') + '" ' +
+          'aria-checked="' + sel + '" type="button">' +
           '<span class="quiz-option-check" aria-hidden="true"></span>' +
           '<span class="quiz-option-text">' +
             '<span class="quiz-option-label">' + opt.label + '</span>' +
@@ -288,38 +374,74 @@
 
     quizCard.innerHTML = (
       '<div class="quiz-step">' +
-        '<span class="quiz-step-count">Question ' + (index + 1) + ' of ' + QUESTIONS.length + '</span>' +
+        '<span class="quiz-step-count">Question ' + visibleStep + ' of ' + visibleTotal + '</span>' +
         '<h2 class="quiz-step-title">' + q.title + '</h2>' +
-        '<div class="quiz-options" role="radiogroup" aria-label="' + q.title + '">' +
+        (isMulti ? '<p class="quiz-step-sub">Select all that apply</p>' : '') +
+        '<div class="quiz-options' + (isMulti ? ' quiz-options--checkbox' : '') + '" ' +
+          'role="' + (isMulti ? 'group' : 'radiogroup') + '" aria-label="' + q.title + '">' +
           optionsHtml +
         '</div>' +
       '</div>'
     );
 
-    quizCard.querySelectorAll('.quiz-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        clearTimeout(autoAdvanceTimer);
-        answers[q.id] = btn.dataset.value;
+    var btns    = quizCard.querySelectorAll('.quiz-option');
+    var noneVal = q.noneValue || null;
 
-        quizCard.querySelectorAll('.quiz-option').forEach(b => {
-          const s = b === btn;
-          b.classList.toggle('selected', s);
-          b.setAttribute('aria-checked', s);
+    if (isMulti) {
+      btns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var val     = btn.dataset.value;
+          var current = Array.isArray(answers[q.id]) ? answers[q.id].slice() : [];
+
+          if (noneVal && val === noneVal) {
+            current = current.includes(noneVal) ? [] : [noneVal];
+          } else {
+            if (noneVal) current = current.filter(function (v) { return v !== noneVal; });
+            var pos = current.indexOf(val);
+            if (pos !== -1) { current.splice(pos, 1); } else { current.push(val); }
+          }
+
+          answers[q.id] = current;
+          nextBtn.disabled = current.length === 0;
+
+          btns.forEach(function (b) {
+            var s = current.includes(b.dataset.value);
+            b.classList.toggle('selected', s);
+            b.setAttribute('aria-checked', s);
+          });
         });
-
-        autoAdvanceTimer = setTimeout(advance, 600);
       });
-    });
+    } else {
+      btns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          clearTimeout(autoAdvanceTimer);
+          answers[q.id] = btn.dataset.value;
+
+          btns.forEach(function (b) {
+            var s = b === btn;
+            b.classList.toggle('selected', s);
+            b.setAttribute('aria-checked', s);
+          });
+
+          autoAdvanceTimer = setTimeout(advance, 600);
+        });
+      });
+    }
   }
 
   // ── Navigation ────────────────────────────────────────────────
   function advance() {
     clearTimeout(autoAdvanceTimer);
-    if (!answers[QUESTIONS[currentQuestion].id]) return;
 
-    if (currentQuestion < QUESTIONS.length - 1) {
-      currentQuestion++;
-      fadeTransition(() => renderQuestion(currentQuestion));
+    var q   = QUESTIONS[currentQuestion];
+    var ans = answers[q.id];
+    var ok  = Array.isArray(ans) ? ans.length > 0 : !!ans;
+    if (!ok) return;
+
+    var nextIdx = getNextIndex(currentQuestion);
+    if (nextIdx < QUESTIONS.length) {
+      currentQuestion = nextIdx;
+      fadeTransition(function () { renderQuestion(currentQuestion); });
     } else {
       finish();
     }
@@ -327,24 +449,25 @@
 
   function back() {
     clearTimeout(autoAdvanceTimer);
-    if (currentQuestion > 0) {
-      currentQuestion--;
-      fadeTransition(() => renderQuestion(currentQuestion));
+    var prevIdx = getPrevIndex(currentQuestion);
+    if (prevIdx >= 0) {
+      currentQuestion = prevIdx;
+      fadeTransition(function () { renderQuestion(currentQuestion); });
     }
   }
 
   // ── Finish: pick plan, call AI, show result ───────────────────
   async function finish() {
-    const planKey    = pickPlan(answers);
-    const addons     = buildAddons(answers, planKey);
-    const careTier   = CARE[answers.care] || null;
-    const totalPrice = PLAN[planKey].price + addons.reduce((s, a) => s + a.price, 0);
-    const budget     = checkBudget(planKey, addons, answers.budget);
+    var planKey    = pickPlan(answers);
+    var addons     = buildAddons(answers, planKey);
+    var careTier   = CARE[answers.care] || null;
+    var totalPrice = PLAN[planKey].price + addons.reduce(function (s, a) { return s + a.price; }, 0);
+    var budget     = checkBudget(planKey, addons, answers.budget);
 
     setProgress(100);
     quizNav.style.display = 'none';
 
-    fadeTransition(() => {
+    fadeTransition(function () {
       quizCard.innerHTML = (
         '<div class="quiz-loading">' +
           '<div class="quiz-loading-dots">' +
@@ -358,56 +481,51 @@
       );
     });
 
-    let explanation = PLAN[planKey].fallback;
+    var explanation = PLAN[planKey].fallback;
 
     try {
-      const controller = new AbortController();
-      const timeout    = setTimeout(() => controller.abort(), 9000);
+      var controller = new AbortController();
+      var timeout    = setTimeout(function () { controller.abort(); }, 9000);
 
-      const res = await fetch(QUIZ_ENDPOINT, {
+      var res = await fetch(QUIZ_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan:         PLAN[planKey].name,
           buildPrice:   PLAN[planKey].priceDisplay,
-          addons:       addons.map(a => ({ name: a.name, price: a.priceDisplay })),
+          addons:       addons.map(function (a) { return { name: a.name, price: a.priceDisplay }; }),
           upfrontTotal: '£' + totalPrice.toFixed(2),
           careTier:     careTier ? { name: careTier.name, price: careTier.priceDisplay } : null,
-          answers,
+          answers:      answers,
         }),
         signal: controller.signal,
       });
 
       clearTimeout(timeout);
       if (res.ok) {
-        const data = await res.json();
+        var data = await res.json();
         if (data.explanation) explanation = data.explanation;
       }
     } catch (_) {
       // Timeout or network error — fallback text already set
     }
 
-    fadeTransition(() => showResult(planKey, addons, careTier, totalPrice, budget, explanation));
+    fadeTransition(function () { showResult(planKey, addons, careTier, totalPrice, budget, explanation); });
   }
 
   // ── Result screen ─────────────────────────────────────────────
   function showResult(planKey, addons, careTier, totalPrice, budget, explanation) {
-    const plan = PLAN[planKey];
-    const wb   = budget.withinBudget;
-    const wbTotal = PLAN[wb.planKey].price + wb.addons.reduce((s, a) => s + a.price, 0);
+    var plan    = PLAN[planKey];
+    var wb      = budget.withinBudget;
+    var wbTotal = PLAN[wb.planKey].price + wb.addons.reduce(function (s, a) { return s + a.price; }, 0);
 
-    // ── Shared helpers ────────────────────────────────────────
-
-    // Dark itemised summary box.
-    // Upfront total row only shown when there are add-ons (otherwise build price is the total).
-    // Care MRR row always appended if a care plan was chosen.
-    function summaryBox(pk, addonsArr, upfront) {
-      const p = PLAN[pk];
-      let rows = '<div class="quiz-result-sum-row"><span>' + p.name + ' build</span><strong>' + p.priceDisplay + '</strong></div>';
-      addonsArr.forEach(a => {
+    function summaryBox(pk, arr, upfront) {
+      var p    = PLAN[pk];
+      var rows = '<div class="quiz-result-sum-row"><span>' + p.name + ' build</span><strong>' + p.priceDisplay + '</strong></div>';
+      arr.forEach(function (a) {
         rows += '<div class="quiz-result-sum-row"><span>' + a.name + '</span><strong>' + a.priceDisplay + '</strong></div>';
       });
-      if (addonsArr.length > 0) {
+      if (arr.length > 0) {
         rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Upfront total</strong></span><strong>£' + upfront.toFixed(2) + '</strong></div>';
       }
       if (careTier) {
@@ -417,24 +535,25 @@
     }
 
     function featuresList(pk) {
-      return '<ul class="quiz-result-list">' + PLAN[pk].features.map(f => '<li>' + f + '</li>').join('') + '</ul>';
+      return '<ul class="quiz-result-list">' + PLAN[pk].features.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>';
     }
 
     function addonsBlock(arr) {
-      return arr.map(a =>
-        '<div class="quiz-result-addon">' +
-          '<div class="quiz-result-addon-row">' +
-            '<span class="quiz-result-addon-name">' + a.name + '</span>' +
-            '<span class="quiz-result-addon-price">' + a.priceDisplay + '</span>' +
-          '</div>' +
-          '<p class="quiz-result-addon-desc">' + a.desc + '</p>' +
-        '</div>'
-      ).join('');
+      return arr.map(function (a) {
+        return (
+          '<div class="quiz-result-addon">' +
+            '<div class="quiz-result-addon-row">' +
+              '<span class="quiz-result-addon-name">' + a.name + '</span>' +
+              '<span class="quiz-result-addon-price">' + a.priceDisplay + '</span>' +
+            '</div>' +
+            '<p class="quiz-result-addon-desc">' + a.desc + '</p>' +
+          '</div>'
+        );
+      }).join('');
     }
 
-    // What was changed to reach the within-budget option
     function droppedNote() {
-      const parts = [];
+      var parts = [];
       if (wb.planDowngraded) parts.push(plan.name + ' plan reduced to ' + PLAN[wb.planKey].name);
       if (wb.dropped && wb.dropped.length) parts.push(wb.dropped.join(' and ') + ' removed');
       return parts.length
@@ -442,30 +561,20 @@
         : '';
     }
 
-    // Builds a JSON-serialisable plan text stored in sessionStorage for the contact form.
-    // items: array of { label, value, isTotal?, isMrr? }
-    // text: plain-text version pre-filled into the message textarea
     function buildPlanText(pk, arr, upfront) {
-      const p     = PLAN[pk];
-      const items = [];
+      var p     = PLAN[pk];
+      var items = [{ label: p.name + ' build', value: p.priceDisplay }];
+      arr.forEach(function (a) { items.push({ label: a.name, value: a.priceDisplay }); });
+      if (arr.length > 0) items.push({ label: 'Upfront total', value: '£' + upfront.toFixed(2), isTotal: true });
+      if (careTier)       items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
 
-      items.push({ label: p.name + ' build', value: p.priceDisplay });
-      arr.forEach(a => items.push({ label: a.name, value: a.priceDisplay }));
-      if (arr.length > 0) {
-        items.push({ label: 'Upfront total', value: '£' + upfront.toFixed(2), isTotal: true });
-      }
-      if (careTier) {
-        items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
-      }
+      var lines = ["I’d like to enquire about the following plan from your quiz:", ''];
+      items.forEach(function (item) { lines.push(item.label + ' — ' + item.value); });
 
-      const lines = ["I'd like to enquire about the following plan from your quiz:", ''];
-      items.forEach(item => lines.push(item.label + ' — ' + item.value));
-
-      return JSON.stringify({ items, text: lines.join('\n') });
+      return JSON.stringify({ items: items, text: lines.join('\n') });
     }
 
-    // ── Care description box ──────────────────────────────────
-    const careHtml = careTier
+    var careHtml = careTier
       ? '<div class="quiz-result-care-box">' +
           '<div class="quiz-result-care-name">' + careTier.name +
             '<span class="quiz-result-care-price">' + careTier.priceDisplay + '</span>' +
@@ -474,8 +583,7 @@
         '</div>'
       : '';
 
-    // ── CTA section with "Get in touch" enquiry flow ──────────
-    const ctasHtml =
+    var ctasHtml =
       '<div class="quiz-result-ctas">' +
         '<div id="quizEnquireWrap">' +
           '<button type="button" class="btn btn-dark btn-block" id="quizEnquireBtn">Get in touch →</button>' +
@@ -484,12 +592,10 @@
         '<a href="quiz.html" class="quiz-restart">← Start again</a>' +
       '</div>';
 
-    // ── Build result HTML ────────────────────────────────────
-    let recsHtml;
+    var recsHtml;
 
     if (!budget.isMismatch) {
-      // Single card: plan fits budget — one recommendation with a "fits your budget" badge
-      const title = plan.name + (addons.length ? ' + add-ons' : '');
+      var title = plan.name + (addons.length ? ' + add-ons' : '');
       recsHtml =
         '<div class="quiz-result-solo">' +
           '<div class="quiz-result-rec quiz-result-rec--ideal">' +
@@ -504,11 +610,10 @@
           '</div>' +
         '</div>';
     } else {
-      // Two cards: ideal plan exceeds budget — show budget-friendly option and best overall
-      const wbTitle    = PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '');
-      const idealTitle = plan.name + (addons.length ? ' + add-ons' : '');
+      var wbTitle    = PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '');
+      var idealTitle = plan.name + (addons.length ? ' + add-ons' : '');
 
-      const wbCard =
+      var wbCard =
         '<div class="quiz-result-rec">' +
           '<span class="quiz-result-rec-label">Within your budget</span>' +
           '<h3 class="quiz-result-rec-title">' + wbTitle + '</h3>' +
@@ -518,7 +623,7 @@
           summaryBox(wb.planKey, wb.addons, wbTotal) +
         '</div>';
 
-      const idealCard =
+      var idealCard =
         '<div class="quiz-result-rec quiz-result-rec--ideal">' +
           '<span class="quiz-result-rec-label">Best for your needs</span>' +
           '<h3 class="quiz-result-rec-title">' + idealTitle + '</h3>' +
@@ -530,7 +635,7 @@
       recsHtml = '<div class="quiz-result-recs">' + wbCard + idealCard + '</div>';
     }
 
-    const html =
+    var html =
       '<div class="quiz-results">' +
         '<div class="quiz-result-header">' +
           '<div class="quiz-result-badge">✓ Your personalised recommendation</div>' +
@@ -543,25 +648,23 @@
 
     quizCard.innerHTML = html;
 
-    // ── Wire up enquiry CTA ───────────────────────────────────
-    document.getElementById('quizEnquireBtn').addEventListener('click', () => {
+    document.getElementById('quizEnquireBtn').addEventListener('click', function () {
       if (budget.isMismatch) {
-        // Show a plan-choice prompt before navigating
-        const wrap       = document.getElementById('quizEnquireWrap');
-        const wbLabel    = PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '') + ' (budget option)';
-        const idealLabel = plan.name + (addons.length ? ' + add-ons' : '') + ' (best option)';
+        var wrap       = document.getElementById('quizEnquireWrap');
+        var wbLabel    = PLAN[wb.planKey].name + (wb.addons.length ? ' + add-ons' : '') + ' (budget option)';
+        var idealLabel = plan.name + (addons.length ? ' + add-ons' : '') + ' (best option)';
 
         wrap.innerHTML =
           '<p class="quiz-plan-choice-label">Which plan would you like to enquire about?</p>' +
           '<button type="button" class="btn btn-ghost btn-block quiz-plan-choice" data-which="within">Enquire about ' + wbLabel + '</button>' +
           '<button type="button" class="btn btn-dark btn-block quiz-plan-choice" data-which="ideal">Enquire about ' + idealLabel + '</button>';
 
-        wrap.querySelectorAll('.quiz-plan-choice').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const which = btn.dataset.which;
-            const pk    = which === 'within' ? wb.planKey : planKey;
-            const ao    = which === 'within' ? wb.addons  : addons;
-            const tot   = which === 'within' ? wbTotal    : totalPrice;
+        wrap.querySelectorAll('.quiz-plan-choice').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var which = btn.dataset.which;
+            var pk    = which === 'within' ? wb.planKey : planKey;
+            var ao    = which === 'within' ? wb.addons  : addons;
+            var tot   = which === 'within' ? wbTotal    : totalPrice;
             sessionStorage.setItem('quizPlan', buildPlanText(pk, ao, tot));
             window.location.href = 'index.html#contact';
           });

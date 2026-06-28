@@ -31,16 +31,22 @@ exports.handler = async (event) => {
       shop:   'an online shop with many pages',
     };
     const paymentsMap = {
-      no:           'no payments needed',
-      sell_products: 'selling products online (full shop)',
-      bookings:     'taking payment for bookings or appointments',
-      other:        'taking deposits or one-off payments',
+      sell_products: 'selling products online',
+      bookings:      'taking payment for bookings or appointments',
+      other:         'taking deposits or one-off payments',
     };
     const budgetMap = {
       'under500': 'under £500',
       '500-750':  '£500–£750',
       '750plus':  '£750 or more',
     };
+
+    // goal and payments are now arrays (multi-select)
+    const goals    = Array.isArray(answers.goal)     ? answers.goal     : [answers.goal].filter(Boolean);
+    const payments = Array.isArray(answers.payments) ? answers.payments : [answers.payments].filter(Boolean);
+
+    const goalsStr    = goals.map(g => goalMap[g] || g).join(' and ');
+    const paymentsStr = payments.filter(p => p !== 'no').map(p => paymentsMap[p] || p).join(' and ');
 
     // Build a concise itemised cost summary for the prompt
     let costLines = plan + ' build: ' + buildPrice;
@@ -55,9 +61,9 @@ exports.handler = async (event) => {
     const prompt =
       'Write 2–3 warm, friendly sentences for a web design client. ' +
       'Recommendation: ' + costLines + '. ' +
-      'Their answers: goal is to ' + (goalMap[answers.goal] || answers.goal) + ', ' +
+      'Their answers: goals are to ' + (goalsStr || 'build a website') + ', ' +
       'needs ' + (pagesMap[answers.pages] || answers.pages) + ', ' +
-      (paymentsMap[answers.payments] ? paymentsMap[answers.payments] + ', ' : '') +
+      (paymentsStr ? paymentsStr + ', ' : '') +
       'budget ' + (budgetMap[answers.budget] || answers.budget) + '. ' +
       'Briefly explain why this suits them. Speak directly. Warm, no bullet points.';
 
