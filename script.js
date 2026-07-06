@@ -79,11 +79,12 @@ if (form) {
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      await fetch('/', {
+      const res = await fetch('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(new FormData(form)).toString(),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       note.textContent = "Thanks! We'll be in touch within one business day.";
       form.reset();
     } catch (_) {
@@ -139,7 +140,7 @@ if (scrollStage && !prefersReducedMotion) {
     const range = vh / 2 + cardRect.height / 2;
     const normalized = Math.max(0, Math.min(1, (cardCenter - viewportCenter) / range));
 
-    const maxTilt = isMobileTilt() ? 9 : 14;
+    const maxTilt = isMobileTilt() ? 5 : 8;
     const rotate = maxTilt * normalized;
 
     scrollCard.style.transform = `rotateX(${rotate}deg)`;
@@ -301,4 +302,140 @@ if (footerLinksEl) {
     showCookieBanner();
   });
   footerLinksEl.appendChild(cookieSettingsLink);
+}
+
+
+// ---------- Custom cursor (desktop only) ----------
+const cursorDot  = document.querySelector('.cursor-dot');
+const cursorRing = document.querySelector('.cursor-ring');
+if (cursorDot && cursorRing && window.matchMedia('(hover: hover)').matches) {
+  let ringX = 0, ringY = 0, mouseX = 0, mouseY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursorDot.style.transform = `translate(calc(${mouseX}px - 50%), calc(${mouseY}px - 50%))`;
+  });
+
+  (function animateRing() {
+    ringX += (mouseX - ringX) * 0.14;
+    ringY += (mouseY - ringY) * 0.14;
+    cursorRing.style.transform = `translate(calc(${ringX}px - 50%), calc(${ringY}px - 50%))`;
+    requestAnimationFrame(animateRing);
+  })();
+
+  document.querySelectorAll('a, button, .btn, .card, .work-card').forEach((el) => {
+    el.addEventListener('mouseenter', () => cursorRing.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => cursorRing.classList.remove('cursor-hover'));
+  });
+
+  document.addEventListener('mouseleave', () => {
+    cursorDot.style.opacity  = '0';
+    cursorRing.style.opacity = '0';
+  });
+  document.addEventListener('mouseenter', () => {
+    cursorDot.style.opacity  = '1';
+    cursorRing.style.opacity = '1';
+  });
+}
+
+// ---------- Magnetic buttons (lerp for smoothness) ----------
+if (!prefersReducedMotion && window.matchMedia('(hover: hover)').matches) {
+  document.querySelectorAll('.btn-dark, .btn-ghost').forEach((btn) => {
+    let cx = 0, cy = 0, tx = 0, ty = 0, raf = null;
+
+    const tick = () => {
+      cx += (tx - cx) * 0.14;
+      cy += (ty - cy) * 0.14;
+      btn.style.transform = `translate(${cx}px, ${cy}px)`;
+      if (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        if (tx === 0 && ty === 0) btn.style.transform = '';
+        raf = null;
+      }
+    };
+
+    btn.addEventListener('mouseenter', () => {
+      btn.style.transition = 'box-shadow .15s ease, background .15s ease, opacity .15s ease';
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      tx = (e.clientX - (r.left + r.width  / 2)) * 0.12;
+      ty = (e.clientY - (r.top  + r.height / 2)) * 0.12;
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+    btn.addEventListener('mouseleave', () => {
+      tx = 0; ty = 0;
+      btn.style.transition = '';
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+  });
+}
+
+// ---------- Counter animation on stat numbers ----------
+if (!prefersReducedMotion) {
+  const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
+
+  document.querySelectorAll('.stat-num').forEach((el) => {
+    const raw = el.textContent.trim();
+    const match = raw.match(/^([£]?)(\d[\d,.]*)(.*)$/);
+    if (!match) return;
+    const prefix = match[1];
+    const numStr = match[2].replace(/,/g, '');
+    const suffix = match[3];
+    const target = parseFloat(numStr);
+    if (isNaN(target) || target === 0) return;
+    const isDecimal = numStr.includes('.');
+    el.dataset.target = target;
+    el.dataset.prefix = prefix;
+    el.dataset.suffix = suffix;
+    el.dataset.decimal = isDecimal ? '1' : '0';
+    let started = false;
+
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !started) {
+          started = true;
+          const duration = 1200;
+          const startTime = performance.now();
+          const animate = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = easeOutQuart(progress);
+            const current = target * eased;
+            const display = isDecimal ? current.toFixed(2) : Math.round(current).toString();
+            el.textContent = prefix + display + suffix;
+            if (progress < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+          counterObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+    counterObserver.observe(el);
+  });
+}
+
+// ---------- Card 3D tilt (no transition lag) ----------
+if (!prefersReducedMotion && window.matchMedia('(hover: hover)').matches) {
+  document.querySelectorAll('.card:not(.glow-card), .work-card').forEach((card) => {
+    const isWork = card.classList.contains('work-card');
+    card.addEventListener('pointerenter', () => {
+      card.style.transition = isWork
+        ? 'box-shadow .3s ease'
+        : 'box-shadow .25s ease, border-color .25s ease';
+    });
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      card.style.transform = `perspective(800px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-4px)`;
+    });
+    card.addEventListener('pointerleave', () => {
+      card.style.transition = '';
+      card.style.transform = '';
+    });
+  });
 }
