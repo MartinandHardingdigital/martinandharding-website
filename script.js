@@ -180,6 +180,31 @@ if (scrollStage && !prefersReducedMotion) {
   updateTilt();
 }
 
+// Subtle two-layer dot-grid background parallax (site-wide, decorative only)
+const bgDotsLayer1 = document.querySelector('.bg-dots-layer-1');
+const bgDotsLayer2 = document.querySelector('.bg-dots-layer-2');
+if (bgDotsLayer1 && bgDotsLayer2 && !prefersReducedMotion) {
+  const updateBgParallax = () => {
+    const y = window.scrollY;
+    bgDotsLayer1.style.transform = `translateY(${y * 0.04}px)`;
+    bgDotsLayer2.style.transform = `translateY(${y * 0.08}px)`;
+  };
+
+  let bgDotsTicking = false;
+  const onBgDotsScroll = () => {
+    if (!bgDotsTicking) {
+      bgDotsTicking = true;
+      requestAnimationFrame(() => {
+        updateBgParallax();
+        bgDotsTicking = false;
+      });
+    }
+  };
+
+  window.addEventListener('scroll', onBgDotsScroll);
+  updateBgParallax();
+}
+
 // ---------- Cookie consent (categories) + gated scripts ----------
 // TODO: replace with your real GA4 Measurement ID from analytics.google.com
 const GA_MEASUREMENT_ID = 'G-7LYB56D3D0';

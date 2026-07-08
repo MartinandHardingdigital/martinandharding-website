@@ -6,9 +6,9 @@
   --bg-alt: #efe9dc;
   --card: #ffffff;
   --line: #e3ded2;
-  --accent: #0f6e5c;
-  --accent-soft: #e3f3ee;
-  --accent-tint: #8fe3cb;
+  --accent: #2c4a9e;
+  --accent-soft: #e7ecfa;
+  --accent-tint: #93aef0;
   --amber: #c98a3c;
   --amber-deep: #8a5a1f;
   --amber-soft: #f7e8d3;
@@ -28,6 +28,37 @@ body {
   color: var(--ink);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Background texture: subtle two-layer dot-grid parallax ---------- */
+/* Purely decorative (aria-hidden), sits behind all content. JS in script.js
+   translates the two layers at different rates on scroll for a faint depth
+   effect; layers are heavily overscanned so that translation never reveals
+   an edge. Static (no motion) under prefers-reduced-motion. */
+.bg-dots {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-dots-layer {
+  position: absolute;
+  inset: -150% 0;
+  background-repeat: repeat;
+  will-change: transform;
+}
+.bg-dots-layer-1 {
+  background-image: radial-gradient(circle, rgba(28,43,35,.06) 1px, transparent 1.6px);
+  background-size: 28px 28px;
+}
+.bg-dots-layer-2 {
+  background-image: radial-gradient(circle, rgba(28,43,35,.045) 1px, transparent 1.4px);
+  background-size: 19px 19px;
+  background-position: 9px 9px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-dots-layer { transform: none !important; }
 }
 
 .container {
@@ -357,7 +388,7 @@ ul { padding: 0; margin: 0; list-style: none; }
 .mock-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .mock-avatar { width: 32px; height: 32px; border-radius: 50%; margin-bottom: 6px; }
 .avatar-blue { background: linear-gradient(135deg, #4a5850, #1c2b23); }
-.avatar-green { background: linear-gradient(135deg, #22a382, #0f6e5c); }
+.avatar-green { background: linear-gradient(135deg, #4a6cc4, #2c4a9e); }
 .mock-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
 /* ---------- Logos ---------- */
@@ -439,7 +470,7 @@ ul { padding: 0; margin: 0; list-style: none; }
   isolation: isolate;
   --mx: 50%;
   --my: 50%;
-  --glow-rgb: 15, 110, 92;
+  --glow-rgb: 44, 74, 158;
   border-color: var(--line);
   transition: border-color .35s ease, box-shadow .35s ease, transform .2s ease;
 }
@@ -520,7 +551,7 @@ ul { padding: 0; margin: 0; list-style: none; }
   box-shadow: var(--shadow);
   border: 1px solid var(--line);
 }
-.work-1 { background: linear-gradient(160deg, #e3f3ee, #f3f8f6); }
+.work-1 { background: linear-gradient(160deg, #e7ecfa, #f4f6fc); }
 .work-2 { background: linear-gradient(160deg, #f7e8d3, #fbf3e7); }
 .work-3 { background: linear-gradient(160deg, #e7e4d8, #f3f1e9); }
 .work-tag {
@@ -971,7 +1002,7 @@ ul { padding: 0; margin: 0; list-style: none; }
 .quiz-option.selected {
   border-color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 0 3px rgba(15,110,92,.12);
+  box-shadow: 0 0 0 3px rgba(44,74,158,.12);
 }
 
 .quiz-option-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
