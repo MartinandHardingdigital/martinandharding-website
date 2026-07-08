@@ -420,7 +420,7 @@ ul { padding: 0; margin: 0; list-style: none; }
 .grid { display: grid; gap: 24px; }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
 .grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 .services { padding: 40px 0 90px; }
 .card {
