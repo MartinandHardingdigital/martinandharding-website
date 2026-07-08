@@ -4,26 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="description" content="Martin & Harding Digital builds fast, professional websites for local businesses — from £399.50, live in days, with optional monthly care plans.">
-<meta property="og:title" content="Martin & Harding Digital — Websites that grow your business">
-<meta property="og:description" content="Custom, fast-loading websites for local businesses, built and launched in days — plus optional monthly care plans to keep your site running and growing.">
+<meta name="description" content="Martin & Harding Digital builds fast, professional websites for local businesses: from £399.50, live in days, with optional monthly care plans.">
+<meta property="og:title" content="Martin & Harding Digital: Websites that grow your business">
+<meta property="og:description" content="Custom, fast-loading websites for local businesses, built and launched in days, plus optional monthly care plans to keep your site running and growing.">
 <meta property="og:type" content="website">
-<title>Martin & Harding Digital — Websites that grow your business</title>
+<title>Martin & Harding Digital: Websites that grow your business</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314161a'/%3E%3Ctext x='32' y='40' font-family='Arial, sans-serif' font-size='22' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EM%26H%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+<a href="#top" class="skip-link">Skip to main content</a>
+
 <header class="nav-wrap">
-  <nav class="nav">
+  <nav class="nav" aria-label="Primary">
     <a href="#top" class="logo">
       <span class="logo-mark">M&H</span>
       <span class="logo-text">Martin &amp; Harding <strong>Digital</strong></span>
     </a>
-    <div class="nav-dropdown">
+    <div class="nav-dropdown" id="navDropdown">
       <div class="nav-links">
         <a href="#services" class="nav-link"><span class="nav-link-text">Services</span></a>
         <a href="#work" class="nav-link"><span class="nav-link-text">Work</span></a>
@@ -33,11 +35,11 @@
         <a href="#contact" class="nav-link"><span class="nav-link-text">Contact</span></a>
       </div>
       <div class="nav-actions">
-        <a href="#contact" class="btn btn-ghost">Log in</a>
+        <a href="#contact" class="btn btn-ghost">Get a quote</a>
         <a href="#contact" class="btn btn-dark">Start a project</a>
       </div>
     </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navDropdown">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -51,7 +53,7 @@
       <span class="badge reveal">Now taking on a small number of founding clients</span>
       <h1 class="reveal">Websites built to <span class="highlight">grow your business</span></h1>
       <p class="hero-sub reveal">
-        Fast, beautiful websites that turn visitors into customers — no templates,
+        Fast, beautiful websites that turn visitors into customers: no templates,
         no jargon, no chasing us for updates. Launch in weeks, not months.
       </p>
       <div class="hero-cta reveal-group">
@@ -60,9 +62,9 @@
       </div>
 
       <div class="trust-row reveal-group">
-        <span class="trust-item reveal"><i class="check"></i> Custom design</span>
-        <span class="trust-item reveal"><i class="check"></i> SEO-ready <span class="green">▲ ranks higher</span></span>
-        <span class="trust-item reveal"><i class="check"></i> 2-week delivery</span>
+        <span class="trust-item reveal"><i class="check" aria-hidden="true"></i> Custom design</span>
+        <span class="trust-item reveal"><i class="check" aria-hidden="true"></i> SEO-ready <span class="green">&#9650; ranks higher</span></span>
+        <span class="trust-item reveal"><i class="check" aria-hidden="true"></i> 2-week delivery</span>
       </div>
 
       <div class="hero-visual reveal">
@@ -80,7 +82,7 @@
               <div class="mock-avatar avatar-blue"></div>
               <strong>Your Business</strong>
               <span class="mock-sub">hello@yourbusiness.com</span>
-              <span class="mock-sub">Sample layout —<br>not a real client</span>
+              <span class="mock-sub">Sample layout<br>(not a real client)</span>
             </div>
             <div class="mock-col">
               <span class="mock-label">BUILT BY</span>
@@ -99,9 +101,9 @@
     <div class="container">
       <p class="logos-label reveal">New agency. Here's what that actually means for you</p>
       <div class="logos-row trust-strip reveal-group">
-        <span class="trust-item reveal"><i class="check"></i> Direct access to the person building your site</span>
-        <span class="trust-item reveal"><i class="check"></i> Fixed price, agreed upfront — no surprise invoices</span>
-        <span class="trust-item reveal"><i class="check"></i> Unlimited revisions before we start building</span>
+        <span class="trust-item reveal"><i class="check" aria-hidden="true"></i> Direct access to the person building your site</span>
+        <span class="trust-item reveal"><i class="check" aria-hidden="true"></i> Fixed price, agreed upfront: no surprise invoices</span>
+        <span class="trust-item reveal"><i class="check" aria-hidden="true"></i> Unlimited revisions before we start building</span>
       </div>
       <div class="stats-row reveal-group">
         <div class="stat-tile reveal">
@@ -129,36 +131,36 @@
       <div class="section-head reveal">
         <span class="eyebrow">What we do</span>
         <h2>Everything you need to look credible online</h2>
-        <p>From a single landing page to a full product site — we cover the whole stack.</p>
+        <p>From a single landing page to a full product site: we cover the whole stack.</p>
       </div>
       <div class="grid grid-3 reveal-group">
-        <div class="card glow-card glow-blue reveal">
-          <div class="card-icon icon-blue">✦</div>
+        <div class="card glow-card reveal">
+          <div class="card-icon" aria-hidden="true">&#10022;</div>
           <h3>Web Design</h3>
-          <p>Custom, on-brand interfaces designed to convert — no templates, no clutter.</p>
+          <p>Custom, on-brand interfaces designed to convert: no templates, no clutter.</p>
         </div>
-        <div class="card glow-card glow-green reveal">
-          <div class="card-icon icon-green">⌁</div>
+        <div class="card glow-card reveal">
+          <div class="card-icon" aria-hidden="true">&#9121;</div>
           <h3>Development</h3>
           <p>Fast, responsive, accessible builds using modern frameworks and clean code.</p>
         </div>
-        <div class="card glow-card glow-purple reveal">
-          <div class="card-icon icon-purple">◎</div>
+        <div class="card glow-card reveal">
+          <div class="card-icon" aria-hidden="true">&#9678;</div>
           <h3>SEO &amp; Performance</h3>
-          <p>Sites engineered to load instantly and rank — technical SEO baked in from day one.</p>
+          <p>Sites engineered to load instantly and rank: technical SEO baked in from day one.</p>
         </div>
-        <div class="card glow-card glow-orange reveal">
-          <div class="card-icon icon-orange">✎</div>
+        <div class="card glow-card reveal">
+          <div class="card-icon" aria-hidden="true">&#9998;</div>
           <h3>Branding</h3>
           <p>Logo, colour system, and typography that make your business instantly recognisable.</p>
         </div>
-        <div class="card glow-card glow-blue reveal">
-          <div class="card-icon icon-blue">⟳</div>
+        <div class="card glow-card reveal">
+          <div class="card-icon" aria-hidden="true">&#8635;</div>
           <h3>Ongoing Support</h3>
-          <p>Updates, hosting, and monitoring after launch — so your site keeps performing.</p>
+          <p>Updates, hosting, and monitoring after launch, so your site keeps performing.</p>
         </div>
-        <div class="card glow-card glow-green reveal">
-          <div class="card-icon icon-green">⚙</div>
+        <div class="card glow-card reveal">
+          <div class="card-icon" aria-hidden="true">&#9881;</div>
           <h3>E-commerce</h3>
           <p>Secure, scalable stores built to handle real traffic and real transactions.</p>
         </div>
@@ -197,7 +199,7 @@
       <div class="section-head reveal">
         <span class="eyebrow">What we build</span>
         <h2>Examples of the kind of site we can build for you</h2>
-        <p>Concept layouts showing the style and polish you'll get — your site is designed from scratch around your brand, not a template.</p>
+        <p>Concept layouts showing the style and polish you'll get: your site is designed from scratch around your brand, not a template.</p>
       </div>
       <div class="grid grid-3 work-grid reveal-group">
         <div class="work-card work-1 reveal"><span class="work-tag">E-commerce concept</span><h3>Boutique Store</h3></div>
@@ -250,10 +252,10 @@
           <div id="planNormal">
             <label for="budget">Which package are you interested in?</label>
             <select id="budget" name="budget">
-              <option value="">Not sure — let's talk</option>
-              <option value="Starter — £399.50">Starter — £399.50</option>
-              <option value="Standard — £599.50">Standard — £599.50</option>
-              <option value="E-commerce — £899.50">E-commerce — £899.50</option>
+              <option value="">Not sure, let's talk</option>
+              <option value="Starter: £399.50">Starter: £399.50</option>
+              <option value="Growth: £599.50">Growth: £599.50</option>
+              <option value="Pro: £899.50">Pro: £899.50</option>
             </select>
           </div>
           <!-- Quiz mode: shown when arriving from the plan finder -->
@@ -270,7 +272,7 @@
           <textarea id="message" name="message" rows="4" placeholder="What are you looking to build?" required></textarea>
         </div>
         <button type="submit" class="btn btn-dark btn-block btn-lg">Send message</button>
-        <p class="form-note" id="formNote"></p>
+        <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
       </form>
     </div>
   </section>

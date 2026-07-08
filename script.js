@@ -6,12 +6,14 @@ const navDropdown = document.querySelector('.nav-dropdown');
 navToggle.addEventListener('click', () => {
   const open = navDropdown.classList.toggle('open');
   navToggle.classList.toggle('active', open);
+  navToggle.setAttribute('aria-expanded', String(open));
 });
 
 document.querySelectorAll('.nav-dropdown a').forEach((link) => {
   link.addEventListener('click', () => {
     navDropdown.classList.remove('open');
     navToggle.classList.remove('active');
+    navToggle.setAttribute('aria-expanded', 'false');
   });
 });
 
@@ -49,7 +51,7 @@ if (form) {
       // Set the hidden budget field to a short plan identifier for the email subject
       if (planLabel) {
         const firstItem = planData.items[0].label.replace(' build', '');
-        planLabel.value = 'Quiz result — ' + firstItem;
+        planLabel.value = 'Quiz result: ' + firstItem;
       }
 
       // Render the dark itemised breakdown
@@ -76,20 +78,31 @@ if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = form.querySelector('[type="submit"]');
-    if (submitBtn) submitBtn.disabled = true;
+    const originalBtnText = submitBtn ? submitBtn.textContent : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+    }
+    note.classList.remove('form-note-error');
+    note.textContent = '';
 
     try {
-      await fetch('/', {
+      const res = await fetch('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(new FormData(form)).toString(),
       });
-      note.textContent = "Thanks! We'll be in touch within one business day.";
+      if (!res.ok) throw new Error('Form submission failed with status ' + res.status);
+      note.textContent = "Thanks, your message has been sent. We'll be in touch within one business day.";
       form.reset();
     } catch (_) {
-      note.textContent = 'Something went wrong. Please email us at contact@martinandharding.co.uk';
+      note.classList.add('form-note-error');
+      note.textContent = 'Something went wrong sending your message. Please email us directly at contact@martinandharding.co.uk';
     } finally {
-      if (submitBtn) submitBtn.disabled = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
     }
   });
 }
@@ -131,7 +144,7 @@ if (scrollStage && !prefersReducedMotion) {
 
     // Tilt only happens on the way in: leaning back while the card is
     // still approaching the viewport's center from below, then settling
-    // perfectly flat once it reaches center — and staying flat from then
+    // perfectly flat once it reaches center, and staying flat from then
     // on, with no reverse tilt as it later scrolls out of sight.
     const cardRect = scrollCard.getBoundingClientRect();
     const cardCenter = cardRect.top + cardRect.height / 2;

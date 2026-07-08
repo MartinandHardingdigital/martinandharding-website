@@ -1,4 +1,4 @@
-// Martin & Harding Digital — AI Plan Finder
+// Martin & Harding Digital: AI Plan Finder
 // Quiz-specific logic only. Shared utilities (nav, cookies, year) live in script.js.
 
 (function () {
@@ -22,16 +22,16 @@
         { value: 'showcase',  label: 'Show what I do',      sub: 'A professional presence I can share with confidence' },
         { value: 'enquiries', label: 'Get enquiries',        sub: 'Attract leads and turn visitors into contacts' },
         { value: 'sell',      label: 'Sell products online', sub: 'Take orders and payments through my website' },
-        { value: 'above_all', label: 'All of the above',    sub: 'All of the above — I need a full-featured site' },
+        { value: 'above_all', label: 'All of the above',    sub: 'All of the above: I need a full-featured site' },
       ],
     },
     {
       id: 'pages',
       title: 'Roughly how many pages do you need?',
       options: [
-        { value: '1-3',  label: '1–3 pages',        sub: 'Home, about, contact — the essentials' },
+        { value: '1-3',  label: '1–3 pages',        sub: 'Home, about, contact: the essentials' },
         { value: '5-10', label: '5–10 pages',        sub: 'Multiple services, a team page, or a blog' },
-        { value: 'shop', label: "Lots — it's a shop", sub: 'Product pages, categories, a checkout' },
+        { value: 'shop', label: "Lots, it's a shop", sub: 'Product pages, categories, a checkout' },
       ],
     },
     {
@@ -40,10 +40,10 @@
       noneValue: 'no',
       title: 'Do you need to take payments on the site?',
       options: [
-        { value: 'sell_products', label: 'Yes — selling products (a shop)',                  sub: 'Full online shop with checkout' },
-        { value: 'bookings',      label: 'Yes — taking payment for bookings or appointments', sub: 'Clients pay to book slots or services' },
-        { value: 'other',         label: 'Yes — something else',                             sub: 'Deposits, one-off payments, or similar' },
-        { value: 'no',            label: 'No — no payments needed',                          sub: 'Payments not required' },
+        { value: 'sell_products', label: 'Yes, selling products (a shop)',                  sub: 'Full online shop with checkout' },
+        { value: 'bookings',      label: 'Yes, taking payment for bookings or appointments', sub: 'Clients pay to book slots or services' },
+        { value: 'other',         label: 'Yes, something else',                             sub: 'Deposits, one-off payments, or similar' },
+        { value: 'no',            label: 'No, no payments needed',                          sub: 'Payments not required' },
       ],
     },
     {
@@ -90,9 +90,9 @@
       id: 'care',
       title: 'Do you want us to look after the site after launch?',
       options: [
-        { value: 'light',   label: 'Yes — light touch',                     sub: 'Occasional small fixes · £99/month' },
-        { value: 'regular', label: 'Yes — regular updates and support',     sub: 'Ongoing updates and help · £149/month' },
-        { value: 'full',    label: 'Yes — full ongoing growth, SEO and content', sub: 'Full service, SEO, content · £399/month' },
+        { value: 'light',   label: 'Yes, light touch',                     sub: 'Occasional small fixes · £99/month' },
+        { value: 'regular', label: 'Yes, regular updates and support',     sub: 'Ongoing updates and help · £149/month' },
+        { value: 'full',    label: 'Yes, full ongoing growth, SEO and content', sub: 'Full service, SEO, content · £399/month' },
         { value: 'no',      label: 'No, just build it',                          sub: "I'll handle updates myself" },
       ],
     },
@@ -116,30 +116,30 @@
       was: '£799',
       meta: '1–3 pages · launches in 3–5 days',
       features: ['Clean, mobile-friendly design', 'Contact form', 'Basic SEO setup', 'Google Analytics', 'SSL included'],
-      fallback: "Based on your answers, our Starter package is a great fit. It gives you everything you need for a professional online presence — clean design, mobile-friendly, and live in just a few days.",
+      fallback: "Based on your answers, our Starter package is a great fit. It gives you everything you need for a professional online presence: clean design, mobile-friendly, and live in just a few days.",
     },
     standard: {
-      name: 'Standard',
+      name: 'Growth',
       price: 599.50,
       priceDisplay: '£599.50',
       was: '£1,199',
-      meta: '5–10 pages · launches in 5–7 days',
-      features: ['Everything in Starter', 'Multiple service or product pages', 'Contact forms with lead capture', 'On-page SEO foundations', 'Blog-ready'],
-      fallback: "Our Standard package is the right fit for where you want to go. You get a full marketing website with multiple pages, proper SEO foundations, and contact forms built to convert visitors into enquiries.",
+      meta: '5 pages · launches in 5–7 days',
+      features: ['Everything in Starter', 'Proper on-page SEO', 'Google Maps embed', 'Blog with 3 starter posts', 'Social media links'],
+      fallback: "Our Growth package is the right fit for where you want to go. You get proper on-page SEO, a Google Maps embed, a blog with starter posts, and social media links to help local customers find and trust you.",
     },
     ecommerce: {
-      name: 'E-commerce',
+      name: 'Pro',
       price: 899.50,
       priceDisplay: '£899.50',
       was: '£1,799',
-      meta: 'Online shop · launches in 7–10 days',
-      features: ['Full online shop setup', 'Secure checkout & card payments', 'Product management', 'Order notifications', 'Mobile-optimised checkout'],
-      fallback: "An e-commerce build is exactly right for where you want to go. We'll set up a complete online shop with a secure checkout so you can start selling straight away.",
+      meta: 'Up to 12 pages · launches in 10–14 days',
+      features: ['Everything in Growth', 'Booking or reservation system', 'Social feed integration', 'Core Web Vitals speed tuning', 'Schema markup', 'Custom domain setup'],
+      fallback: "Our Pro package is the right fit for where you want to go. You get everything in Growth plus a booking or reservation system, social feed integration, speed tuning, schema markup, and custom domain setup for a fully working site.",
     },
   };
 
   // ── Payment-triggered add-ons ─────────────────────────────────
-  // Added automatically based on the payments Q; E-commerce plan has these built in.
+  // Added automatically based on the payments Q; Pro plan has these built in.
   const ADDON = {
     booking_payment: {
       name: 'Booking system + payments',
@@ -173,9 +173,9 @@
   // ── Care tiers ────────────────────────────────────────────────
   const CARE = {
     no:      null,
-    light:   { name: 'Basic Care',  priceDisplay: '£99/month',  price: 99,  desc: "You'd like occasional help after launch — Basic Care covers hosting, security updates, and small content changes so your site stays in great shape without you lifting a finger." },
+    light:   { name: 'Basic Care',  priceDisplay: '£99/month',  price: 99,  desc: "You'd like occasional help after launch. Basic Care covers hosting, security updates, and small content changes so your site stays in great shape without you lifting a finger." },
     regular: { name: 'Growth Care', priceDisplay: '£149/month', price: 149, desc: "You're after regular support after launch. Growth Care includes all updates, monthly SEO checks, and ongoing content tweaks to keep your site working hard for you." },
-    full:    { name: 'Pro Care',    priceDisplay: '£399/month', price: 399, desc: "You want full ongoing support — a great call. Pro Care covers everything: content, SEO, strategy, and proactive improvements every month." },
+    full:    { name: 'Pro Care',    priceDisplay: '£399/month', price: 399, desc: "You want full ongoing support, a great call. Pro Care covers everything: content, SEO, strategy, and proactive improvements every month." },
   };
 
   // ── Budget limits ─────────────────────────────────────────────
@@ -193,7 +193,12 @@
   const backBtn     = document.getElementById('quizBackBtn');
   const nextBtn     = document.getElementById('quizNextBtn');
 
-  function setProgress(pct) { progressBar.style.width = pct + '%'; }
+  var progressWrap = document.querySelector('.quiz-progress-wrap');
+
+  function setProgress(pct) {
+    progressBar.style.width = pct + '%';
+    if (progressWrap) progressWrap.setAttribute('aria-valuenow', String(Math.round(pct)));
+  }
 
   function fadeTransition(cb) {
     quizCard.style.opacity = '0';
@@ -243,7 +248,7 @@
     var payments = Array.isArray(ans.payments)  ? ans.payments  : [];
     var types    = Array.isArray(ans.addonTypes) ? ans.addonTypes : [];
 
-    // Payment-triggered add-ons (E-commerce plan already includes these)
+    // Payment-triggered add-ons (Pro plan already includes these)
     if (planKey !== 'ecommerce') {
       if (payments.includes('bookings')) list.push(ADDON.booking_payment);
       if (payments.includes('other'))    list.push(ADDON.payment_integration);
@@ -502,7 +507,7 @@
         if (data.explanation) explanation = data.explanation;
       }
     } catch (_) {
-      // Timeout or network error — fallback text already set
+      // Timeout or network error: fallback text already set
     }
 
     fadeTransition(function () { showResult(planKey, addons, careTier, totalPrice, budget, explanation); });
@@ -564,7 +569,7 @@
       if (careTier)       items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
 
       var lines = ['Estimated plan from website quiz (subject to confirmation):', ''];
-      items.forEach(function (item) { lines.push(item.label + ' — ' + item.value); });
+      items.forEach(function (item) { lines.push(item.label + ': ' + item.value); });
 
       return JSON.stringify({ items: items, text: lines.join('\n') });
     }
@@ -633,12 +638,13 @@
     var html =
       '<div class="quiz-results">' +
         '<div class="quiz-result-header">' +
-          '<div class="quiz-result-badge">✓ Your personalised recommendation</div>' +
+          '<div class="quiz-result-badge">&#10003; Your personalised recommendation</div>' +
+          '<h2 class="quiz-result-title">Here\'s what we\'d recommend</h2>' +
           '<p class="quiz-result-intro">' + explanation + '</p>' +
         '</div>' +
         recsHtml +
         careHtml +
-        '<p class="quiz-result-disclaimer">This is an estimate to give you a clear starting point, based on what you\'ve told us. The final price may shift slightly once we\'ve had a proper chat about your project and the details — sometimes things turn out simpler than expected, sometimes there\'s a bit more to it. Either way, there are no surprises: we\'ll always confirm everything with you in writing before any work begins.</p>' +
+        '<p class="quiz-result-disclaimer">This is an estimate to give you a clear starting point, based on what you\'ve told us. The final price may shift slightly once we\'ve had a proper chat about your project and the details. Sometimes things turn out simpler than expected, sometimes there\'s a bit more to it. Either way, there are no surprises: we\'ll always confirm everything with you in writing before any work begins.</p>' +
         ctasHtml +
       '</div>';
 

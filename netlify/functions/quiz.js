@@ -1,4 +1,4 @@
-// Netlify serverless function — builds a short prompt from the quiz result
+// Netlify serverless function: builds a short prompt from the quiz result
 // and calls the Anthropic API server-side so the key never touches the browser.
 //
 // Set ANTHROPIC_API_KEY in: Netlify dashboard → Site settings → Environment variables
@@ -23,7 +23,7 @@ exports.handler = async (event) => {
       showcase:  'show what they do and build credibility',
       enquiries: 'get more enquiries and convert visitors into leads',
       sell:      'sell products online and take payments',
-      above_all: 'do all of the above — showcase, enquiries, and selling',
+      above_all: 'do all of the above: showcase, enquiries, and selling',
     };
     const pagesMap = {
       '1-3':  '1–3 pages',

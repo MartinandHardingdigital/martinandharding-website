@@ -5,52 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Answer 6 quick questions and get an AI-powered recommendation for the perfect Martin &amp; Harding Digital website plan for your business.">
-<meta property="og:title" content="Find Your Perfect Plan — Martin &amp; Harding Digital">
-<meta property="og:description" content="5 questions. Instant AI recommendation. Get a personalised website plan in under 2 minutes.">
+<meta property="og:title" content="Find Your Perfect Plan: Martin &amp; Harding Digital">
+<meta property="og:description" content="6 quick questions. Instant AI recommendation. Get a personalised website plan in under 2 minutes.">
 <meta property="og:type" content="website">
-<title>Find Your Perfect Plan — Martin &amp; Harding Digital</title>
+<title>Find Your Perfect Plan: Martin &amp; Harding Digital</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314161a'/%3E%3Ctext x='32' y='40' font-family='Arial, sans-serif' font-size='22' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EM%26H%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+<a href="#main" class="skip-link">Skip to main content</a>
+
 <header class="nav-wrap">
-  <nav class="nav">
+  <nav class="nav" aria-label="Primary">
     <a href="index.html#top" class="logo">
       <span class="logo-mark">M&H</span>
       <span class="logo-text">Martin &amp; Harding <strong>Digital</strong></span>
     </a>
-    <div class="nav-dropdown">
+    <div class="nav-dropdown" id="navDropdown">
       <div class="nav-links">
         <a href="index.html#services" class="nav-link"><span class="nav-link-text">Services</span></a>
         <a href="index.html#work" class="nav-link"><span class="nav-link-text">Work</span></a>
         <a href="index.html#process" class="nav-link"><span class="nav-link-text">Process</span></a>
         <a href="pricing.html" class="nav-link"><span class="nav-link-text">Pricing</span></a>
-        <a href="quiz.html" class="nav-link"><span class="nav-link-text">Find my plan</span></a>
+        <a href="quiz.html" class="nav-link" aria-current="page"><span class="nav-link-text">Find my plan</span></a>
         <a href="index.html#contact" class="nav-link"><span class="nav-link-text">Contact</span></a>
       </div>
       <div class="nav-actions">
-        <a href="index.html#contact" class="btn btn-ghost">Log in</a>
+        <a href="index.html#contact" class="btn btn-ghost">Get a quote</a>
         <a href="index.html#contact" class="btn btn-dark">Start a project</a>
       </div>
     </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navDropdown">
       <span></span><span></span><span></span>
     </button>
   </nav>
 </header>
 
-<main>
+<main id="main">
 
   <section class="hero quiz-hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="container hero-inner">
       <span class="badge reveal">&#10022; AI-powered plan finder</span>
       <h1 class="reveal">Find your <span class="highlight">perfect plan</span></h1>
-      <p class="hero-sub reveal">Answer 6 quick questions and we'll recommend the right package for your business — with a personalised explanation.</p>
+      <p class="hero-sub reveal">Answer 6 quick questions and we'll recommend the right package for your business, with a personalised explanation.</p>
     </div>
   </section>
 
@@ -58,7 +60,7 @@
     <div class="container">
       <div class="quiz-wrap">
 
-        <div class="quiz-progress-wrap" role="progressbar" aria-label="Quiz progress">
+        <div class="quiz-progress-wrap" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div class="quiz-progress-bar" id="quizProgressBar"></div>
         </div>
 
