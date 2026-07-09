@@ -66,10 +66,10 @@
         return t.includes('simple') && !t.includes('none');
       },
       options: [
-        { value: 'live_chat',      label: 'Live chat',              sub: 'Chat widget so visitors can message you directly · £79' },
-        { value: 'newsletter',     label: 'Newsletter signup',       sub: 'Email capture connected to Mailchimp or similar · £69' },
-        { value: 'social_feed',    label: 'Social media feed',       sub: 'Display your Instagram or Facebook feed on the site · £69' },
-        { value: 'cookie_consent', label: 'Cookie consent banner',  sub: 'GDPR-compliant cookie notice and preference manager · £49' },
+        { value: 'live_chat',      label: 'Live chat',              sub: 'Chat widget so visitors can message you directly · £149.50' },
+        { value: 'newsletter',     label: 'Newsletter signup',       sub: 'Email capture connected to Mailchimp or similar · £149.50' },
+        { value: 'social_feed',    label: 'Social media feed',       sub: 'Display your Instagram or Facebook feed on the site · £149.50' },
+        { value: 'cookie_consent', label: 'Cookie consent banner',  sub: 'GDPR-compliant cookie notice and preference manager · £149.50' },
       ],
     },
     {
@@ -81,19 +81,19 @@
         return t.includes('advanced') && !t.includes('none');
       },
       options: [
-        { value: 'booking_system', label: 'Booking / appointment system', sub: 'Let clients book slots or appointments online · £199' },
-        { value: 'membership',     label: 'Membership & gated content',   sub: 'Private pages, login areas, or member-only sections · £199' },
-        { value: 'crm_forms',      label: 'CRM or custom form setup',     sub: 'Complex forms, lead routing, or CRM integration · £149' },
+        { value: 'booking_system', label: 'Booking / appointment system', sub: 'Let clients book slots or appointments online · £299.50 (included with Pro)' },
+        { value: 'membership',     label: 'Membership & gated content',   sub: 'Private pages, login areas, or member-only sections · £299.50' },
+        { value: 'crm_forms',      label: 'CRM or custom form setup',     sub: 'Complex forms, lead routing, or CRM integration · £299.50' },
       ],
     },
     {
       id: 'care',
       title: 'Do you want us to look after the site after launch?',
       options: [
-        { value: 'light',   label: 'Yes, light touch',                     sub: 'Occasional small fixes · £99/month' },
-        { value: 'regular', label: 'Yes, regular updates and support',     sub: 'Ongoing updates and help · £149/month' },
-        { value: 'full',    label: 'Yes, full ongoing growth, SEO and content', sub: 'Full service, SEO, content · £399/month' },
-        { value: 'no',      label: 'No, just build it',                          sub: "I'll handle updates myself" },
+        { value: 'light',   label: 'Yes, light touch',                 sub: 'Hosting, security, backups, small tweaks · £45/month' },
+        { value: 'regular', label: 'Yes, regular updates and support', sub: 'Ongoing updates and priority help · £95/month' },
+        { value: 'full',    label: 'Yes, full priority support',       sub: 'More hours, same-day priority, strategy calls · £185/month' },
+        { value: 'no',      label: 'No, just build it',                sub: "I'll handle updates myself" },
       ],
     },
     {
@@ -108,78 +108,106 @@
   ];
 
   // ── Plan catalogue ────────────────────────────────────────────
+  // All build prices are founding rates (builds only, never care plans).
+  // isFrom: price is a starting point, quoted per project.
   const PLAN = {
     starter: {
       name: 'Starter',
       price: 399.50,
       priceDisplay: '£399.50',
-      was: '£799',
+      foundingNote: 'Founding rate: £399.50 (full rate £799 once our first 25 founding spots are filled).',
       meta: '1–3 pages · launches in 3–5 days',
       features: ['Clean, mobile-friendly design', 'Contact form', 'Basic SEO setup', 'Google Analytics', 'SSL included'],
       fallback: "Based on your answers, our Starter package is a great fit. It gives you everything you need for a professional online presence: clean design, mobile-friendly, and live in just a few days.",
     },
-    standard: {
+    growth: {
       name: 'Growth',
       price: 599.50,
       priceDisplay: '£599.50',
-      was: '£1,199',
+      foundingNote: 'Founding rate: £599.50 (full rate £1,199 once our first 25 founding spots are filled).',
       meta: '5 pages · launches in 5–7 days',
       features: ['Everything in Starter', 'Proper on-page SEO', 'Google Maps embed', 'Blog with 3 starter posts', 'Social media links'],
       fallback: "Our Growth package is the right fit for where you want to go. You get proper on-page SEO, a Google Maps embed, a blog with starter posts, and social media links to help local customers find and trust you.",
     },
-    ecommerce: {
+    pro: {
       name: 'Pro',
       price: 899.50,
       priceDisplay: '£899.50',
-      was: '£1,799',
+      foundingNote: 'Founding rate: £899.50 (full rate £1,799 once our first 25 founding spots are filled).',
       meta: 'Up to 12 pages · launches in 10–14 days',
-      features: ['Everything in Growth', 'Booking or reservation system', 'Social feed integration', 'Core Web Vitals speed tuning', 'Schema markup', 'Custom domain setup'],
-      fallback: "Our Pro package is the right fit for where you want to go. You get everything in Growth plus a booking or reservation system, social feed integration, speed tuning, schema markup, and custom domain setup for a fully working site.",
+      features: ['Everything in Growth', 'Booking or reservation system included', 'Social feed integration', 'Core Web Vitals speed tuning', 'Schema markup', 'Custom domain setup'],
+      fallback: "Our Pro package is the right fit for where you want to go. You get everything in Growth plus a booking or reservation system built in, social feed integration, speed tuning, schema markup, and custom domain setup for a fully working site.",
+    },
+    ecommerce: {
+      name: 'E-commerce',
+      price: 1499,
+      priceDisplay: 'from £1,499',
+      isFrom: true,
+      foundingNote: 'Founding rate: from £1,499 (full rate from £2,999 once our first 25 founding spots are filled). E-commerce builds are quoted per project.',
+      meta: 'Online shop · quoted per project',
+      features: ['Everything in Pro', 'Full online store & checkout', 'Product & category pages', 'Payment gateway setup (Stripe, PayPal)', 'Order notifications & basic inventory'],
+      fallback: "Our E-commerce package is the right fit for selling online. You get everything in Pro plus a full online store with checkout, product and category pages, and payment gateway setup. Every store is quoted per project, so this is a starting estimate.",
     },
   };
 
   // ── Payment-triggered add-ons ─────────────────────────────────
-  // Added automatically based on the payments Q; Pro plan has these built in.
+  // Added automatically based on the payments Q. The Pro build already
+  // includes a booking system, and E-commerce includes payments, so
+  // those plans are never charged the matching integration.
   const ADDON = {
     booking_payment: {
-      name: 'Booking system + payments',
-      price: 299, priceDisplay: '£299',
+      name: 'Booking system + payments (complex integration)',
+      price: 299.50, priceDisplay: '£299.50',
       desc: 'Booking/reservation system with integrated payment processing',
     },
     payment_integration: {
-      name: 'Payment integration',
-      price: 299, priceDisplay: '£299',
+      name: 'Payment integration (complex integration)',
+      price: 299.50, priceDisplay: '£299.50',
       desc: 'Custom payment flow for deposits, one-off charges, or similar',
     },
   };
 
-  // ── Simple add-ons checklist ──────────────────────────────────
+  // ── Simple add-ons checklist (standard integrations) ──────────
   const SIMPLE_ADDONS = {
-    live_chat:      { name: 'Live chat',             price: 79,  priceDisplay: '£79',  desc: 'Chat widget so visitors can message you directly from your website' },
-    newsletter:     { name: 'Newsletter signup',      price: 69,  priceDisplay: '£69',  desc: 'Email capture form connected to Mailchimp, ConvertKit, or similar' },
-    social_feed:    { name: 'Social media feed',      price: 69,  priceDisplay: '£69',  desc: 'Display your Instagram or Facebook feed automatically on your site' },
-    cookie_consent: { name: 'Cookie consent banner', price: 49,  priceDisplay: '£49',  desc: 'GDPR-compliant cookie notice and preference manager' },
+    live_chat:      { name: 'Live chat',             price: 149.50, priceDisplay: '£149.50', desc: 'Chat widget so visitors can message you directly from your website' },
+    newsletter:     { name: 'Newsletter signup',      price: 149.50, priceDisplay: '£149.50', desc: 'Email capture form connected to Mailchimp, ConvertKit, or similar' },
+    social_feed:    { name: 'Social media feed',      price: 149.50, priceDisplay: '£149.50', desc: 'Display your Instagram or Facebook feed automatically on your site' },
+    cookie_consent: { name: 'Cookie consent banner', price: 149.50, priceDisplay: '£149.50', desc: 'GDPR-compliant cookie notice and preference manager' },
   };
 
-  // ── Advanced add-ons checklist ────────────────────────────────
+  // ── Advanced add-ons checklist (complex integrations) ─────────
   // guardPayment: if this payment type was selected in the payments Q,
   // skip this add-on (it is already covered by ADDON.booking_payment).
+  // includedInPlans: plans that already include this feature, so it is
+  // never charged on top (e.g. Pro includes the booking system).
   const ADVANCED_ADDONS = {
-    booking_system: { name: 'Booking / appointment system', price: 199, priceDisplay: '£199', desc: 'Let clients book appointments or slots online, with email confirmations', guardPayment: 'bookings' },
-    membership:     { name: 'Membership & gated content',   price: 199, priceDisplay: '£199', desc: 'Private pages, login areas, or member-only sections of your site' },
-    crm_forms:      { name: 'CRM or custom form setup',     price: 149, priceDisplay: '£149', desc: 'Complex multi-step forms, lead routing, or integration with your CRM' },
+    booking_system: { name: 'Booking / appointment system', price: 299.50, priceDisplay: '£299.50', desc: 'Let clients book appointments or slots online, with email confirmations', guardPayment: 'bookings', includedInPlans: ['pro', 'ecommerce'] },
+    membership:     { name: 'Membership & gated content',   price: 299.50, priceDisplay: '£299.50', desc: 'Private pages, login areas, or member-only sections of your site' },
+    crm_forms:      { name: 'CRM or custom form setup',     price: 299.50, priceDisplay: '£299.50', desc: 'Complex multi-step forms, lead routing, or integration with your CRM' },
   };
 
   // ── Care tiers ────────────────────────────────────────────────
+  // Standard prices: founding rates never apply to care plans.
   const CARE = {
     no:      null,
-    light:   { name: 'Basic Care',  priceDisplay: '£99/month',  price: 99,  desc: "You'd like occasional help after launch. Basic Care covers hosting, security updates, and small content changes so your site stays in great shape without you lifting a finger." },
-    regular: { name: 'Growth Care', priceDisplay: '£149/month', price: 149, desc: "You're after regular support after launch. Growth Care includes all updates, monthly SEO checks, and ongoing content tweaks to keep your site working hard for you." },
-    full:    { name: 'Pro Care',    priceDisplay: '£399/month', price: 399, desc: "You want full ongoing support, a great call. Pro Care covers everything: content, SEO, strategy, and proactive improvements every month." },
+    light:   { name: 'Basic Care',  priceDisplay: '£45/month',  price: 45,  desc: "You'd like occasional help after launch. Basic Care covers hosting management, security monitoring, backup checks, and up to 45 minutes of small tweaks each month." },
+    regular: { name: 'Growth Care', priceDisplay: '£95/month',  price: 95,  desc: "You're after regular support after launch. Growth Care includes everything in Basic plus up to 2 hours of updates, Google Business Profile updates, a monthly performance summary, and priority support." },
+    full:    { name: 'Pro Care',    priceDisplay: '£185/month', price: 185, desc: "You want full ongoing support, a great call. Pro Care includes everything in Growth plus up to 4 hours of updates each month, same-day priority, and a quarterly strategy call." },
   };
 
   // ── Budget limits ─────────────────────────────────────────────
   const BUDGET_MAX = { 'under500': 500, '500-750': 750, '750plus': Infinity };
+
+  // ── Money formatting ──────────────────────────────────────────
+  function fmtMoney(n) {
+    var opts = n % 1 === 0 ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+    return '£' + n.toLocaleString('en-GB', opts);
+  }
+
+  // Totals that start from an e-commerce build are estimates ("from £X")
+  function fmtTotal(planKey, n) {
+    return (PLAN[planKey].isFrom ? 'from ' : '') + fmtMoney(n);
+  }
 
   // ── State ─────────────────────────────────────────────────────
   let currentQuestion = 0;
@@ -235,11 +263,13 @@
 
     if (goals.includes('sell') || ans.pages === 'shop' || payments.includes('sell_products'))
       return 'ecommerce';
-    if (goals.includes('above_all') || payments.includes('bookings') || payments.includes('other') || ans.pages === '5-10')
-      return 'standard';
+    if (goals.includes('above_all') || payments.includes('bookings'))
+      return 'pro';
+    if (payments.includes('other') || ans.pages === '5-10')
+      return 'growth';
     if (ans.pages === '1-3')
       return 'starter';
-    return 'standard';
+    return 'growth';
   }
 
   // ── Add-on selection ──────────────────────────────────────────
@@ -248,10 +278,13 @@
     var payments = Array.isArray(ans.payments)  ? ans.payments  : [];
     var types    = Array.isArray(ans.addonTypes) ? ans.addonTypes : [];
 
-    // Payment-triggered add-ons (Pro plan already includes these)
-    if (planKey !== 'ecommerce') {
-      if (payments.includes('bookings')) list.push(ADDON.booking_payment);
-      if (payments.includes('other'))    list.push(ADDON.payment_integration);
+    // Payment-triggered add-ons. Pro includes the booking system and
+    // E-commerce includes payments, so those are never charged on top.
+    if (payments.includes('bookings') && planKey !== 'pro' && planKey !== 'ecommerce') {
+      list.push(ADDON.booking_payment);
+    }
+    if (payments.includes('other') && planKey !== 'ecommerce') {
+      list.push(ADDON.payment_integration);
     }
 
     // Checklist add-ons (only when types is not 'none')
@@ -268,6 +301,8 @@
         advSel.forEach(function (key) {
           var addon = ADVANCED_ADDONS[key];
           if (!addon) return;
+          // Skip if the plan already includes this feature (e.g. booking on Pro)
+          if (addon.includedInPlans && addon.includedInPlans.includes(planKey)) return;
           // Double-count guard: skip if this feature is already covered by a payment add-on
           if (addon.guardPayment && payments.includes(addon.guardPayment)) return;
           list.push(addon);
@@ -293,7 +328,7 @@
       return { ideal: ideal, withinBudget: ideal, isMismatch: false };
     }
 
-    var planOrder = ['ecommerce', 'standard', 'starter'];
+    var planOrder = ['ecommerce', 'pro', 'growth', 'starter'];
     var startIdx  = planOrder.indexOf(planKey);
     var sorted    = addons.slice().sort(function (a, b) { return b.price - a.price; });
 
@@ -494,7 +529,7 @@
           plan:         PLAN[planKey].name,
           buildPrice:   PLAN[planKey].priceDisplay,
           addons:       addons.map(function (a) { return { name: a.name, price: a.priceDisplay }; }),
-          upfrontTotal: '£' + totalPrice.toFixed(2),
+          upfrontTotal: fmtTotal(planKey, totalPrice),
           careTier:     careTier ? { name: careTier.name, price: careTier.priceDisplay } : null,
           answers:      answers,
         }),
@@ -521,17 +556,18 @@
 
     function summaryBox(pk, arr, upfront) {
       var p    = PLAN[pk];
-      var rows = '<div class="quiz-result-sum-row"><span>' + p.name + ' build</span><strong>' + p.priceDisplay + '</strong></div>';
+      var rows = '<div class="quiz-result-sum-row"><span>' + p.name + ' build (founding rate)</span><strong>' + p.priceDisplay + '</strong></div>';
       arr.forEach(function (a) {
         rows += '<div class="quiz-result-sum-row"><span>' + a.name + '</span><strong>' + a.priceDisplay + '</strong></div>';
       });
       if (arr.length > 0) {
-        rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Estimated upfront total</strong></span><strong>£' + upfront.toFixed(2) + '</strong></div>';
+        rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Estimated upfront total</strong></span><strong>' + fmtTotal(pk, upfront) + '</strong></div>';
       }
       if (careTier) {
         rows += '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + careTier.name + '</span><strong>' + careTier.priceDisplay + '</strong></div>';
       }
-      return '<div class="quiz-result-summary-box">' + rows + '</div>';
+      return '<div class="quiz-result-summary-box">' + rows + '</div>' +
+        '<p class="quiz-result-rec-note">' + p.foundingNote + '</p>';
     }
 
     function featuresList(pk) {
@@ -563,13 +599,14 @@
 
     function buildPlanText(pk, arr, upfront) {
       var p     = PLAN[pk];
-      var items = [{ label: p.name + ' build', value: p.priceDisplay }];
+      var items = [{ label: p.name + ' build (founding rate)', value: p.priceDisplay }];
       arr.forEach(function (a) { items.push({ label: a.name, value: a.priceDisplay }); });
-      if (arr.length > 0) items.push({ label: 'Estimated upfront total', value: '£' + upfront.toFixed(2), isTotal: true });
+      if (arr.length > 0) items.push({ label: 'Estimated upfront total', value: fmtTotal(pk, upfront), isTotal: true });
       if (careTier)       items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
 
       var lines = ['Estimated plan from website quiz (subject to confirmation):', ''];
       items.forEach(function (item) { lines.push(item.label + ': ' + item.value); });
+      lines.push('', p.foundingNote);
 
       return JSON.stringify({ items: items, text: lines.join('\n') });
     }
@@ -644,6 +681,7 @@
         '</div>' +
         recsHtml +
         careHtml +
+        '<p class="quiz-result-extras">Optional extras, priced separately: blog posts at £85 each (or a 4-post monthly pack for £300/mo) and our SEO Booster at £149/mo for on-page optimisation, local citations, rank tracking, and Google Business Profile optimisation. Both stack with any care plan.</p>' +
         '<p class="quiz-result-disclaimer">This is an estimate to give you a clear starting point, based on what you\'ve told us. The final price may shift slightly once we\'ve had a proper chat about your project and the details. Sometimes things turn out simpler than expected, sometimes there\'s a bit more to it. Either way, there are no surprises: we\'ll always confirm everything with you in writing before any work begins.</p>' +
         ctasHtml +
       '</div>';

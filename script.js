@@ -50,7 +50,7 @@ if (form) {
 
       // Set the hidden budget field to a short plan identifier for the email subject
       if (planLabel) {
-        const firstItem = planData.items[0].label.replace(' build', '');
+        const firstItem = planData.items[0].label.replace(' build (founding rate)', '').replace(' build', '');
         planLabel.value = 'Quiz result: ' + firstItem;
       }
 

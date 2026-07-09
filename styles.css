@@ -613,14 +613,12 @@ ul { padding: 0; margin: 0; list-style: none; }
 }
 .price-period { font-size: 16px; font-weight: 600; color: var(--muted); }
 .price-fit { font-size: 13.5px; color: var(--muted); line-height: 1.55; margin: 0 0 22px; }
-.price-was {
-  font-size: 18px;
-  font-weight: 600;
+.price-founding {
+  font-size: 12.5px;
   color: var(--muted);
-  text-decoration: line-through;
-  margin-right: 10px;
+  line-height: 1.5;
+  margin: -6px 0 6px;
 }
-.price-was-tag { font-size: 13px; margin-right: 6px; color: rgba(255,255,255,.65); }
 .offer-badge { background: var(--amber-soft); color: var(--amber-deep); }
 .offer-tag {
   position: absolute;
@@ -1295,6 +1293,12 @@ ul { padding: 0; margin: 0; list-style: none; }
   line-height: 1.65;
   border-top: 1px solid var(--line);
   padding-top: 16px;
+  margin: 0 0 16px;
+}
+.quiz-result-extras {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.65;
   margin: 0 0 16px;
 }
 
