@@ -50,6 +50,7 @@ if (form) {
 
       // Set the hidden budget field to a short plan identifier for the email subject
       if (planLabel) {
+        planLabel.disabled = false; // takes over the "budget" field from the disabled select
         const firstItem = planData.items[0].label.replace(' build (founding rate)', '').replace(' build', '');
         planLabel.value = 'Quiz result: ' + firstItem;
       }
@@ -86,18 +87,43 @@ if (form) {
     note.classList.remove('form-note-error');
     note.textContent = '';
 
+    // Netlify Forms only exist on the deployed site: a page opened from disk
+    // (file://) or a non-Netlify server has no endpoint to POST to.
+    if (window.location.protocol === 'file:') {
+      console.error('Contact form: page is running from file://, so there is no server to submit to. Test on the deployed site instead.');
+      note.classList.add('form-note-error');
+      note.textContent = 'This form only works on the live website, not a local copy of the page. Please use it at martinandharding.co.uk, or email us at contact@martinandharding.co.uk';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+      return;
+    }
+
     try {
+      const body = new URLSearchParams(new FormData(form)).toString();
       const res = await fetch('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(new FormData(form)).toString(),
+        body,
       });
-      if (!res.ok) throw new Error('Form submission failed with status ' + res.status);
+      if (!res.ok) {
+        const resBody = await res.text().catch(() => '(unreadable)');
+        console.error('Contact form: server rejected the submission', {
+          status: res.status,
+          statusText: res.statusText,
+          responseBody: resBody.slice(0, 500),
+          sentBody: body,
+        });
+        throw new Error('server responded with ' + res.status + ' ' + res.statusText);
+      }
       note.textContent = "Thanks, your message has been sent. We'll be in touch within one business day.";
       form.reset();
-    } catch (_) {
+    } catch (err) {
+      console.error('Contact form: submission failed', err);
       note.classList.add('form-note-error');
-      note.textContent = 'Something went wrong sending your message. Please email us directly at contact@martinandharding.co.uk';
+      const detail = err && err.message ? err.message : 'network error';
+      note.textContent = 'Something went wrong sending your message (' + detail + '). Please email us directly at contact@martinandharding.co.uk';
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;

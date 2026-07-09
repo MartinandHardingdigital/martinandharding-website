@@ -267,7 +267,8 @@
           </div>
           <!-- Quiz mode: shown when arriving from the plan finder -->
           <div id="planQuiz" style="display:none">
-            <input type="hidden" name="budget" id="planQuizHidden" value="Quiz result">
+            <!-- disabled by default so it never duplicates the select's "budget" field; script.js enables it in quiz mode -->
+            <input type="hidden" name="budget" id="planQuizHidden" value="Quiz result" disabled>
             <label>Your selected plan</label>
             <div class="quiz-plan-summary" id="quizPlanSummary">
               <!-- Populated by script.js when sessionStorage quiz data is present -->
