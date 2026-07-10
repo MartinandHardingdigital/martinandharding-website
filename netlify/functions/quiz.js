@@ -17,7 +17,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { plan, buildPrice, addons, upfrontTotal, careTier, answers } = JSON.parse(event.body);
+    const { plan, buildPrice, addons, upfrontTotal, careTier, seoTier, contentTier, answers } = JSON.parse(event.body);
 
     const goalMap = {
       showcase:  'show what they do and build credibility',
@@ -54,8 +54,11 @@ exports.handler = async (event) => {
       costLines += '. Add-ons: ' + addons.map(a => a.name + ' ' + a.price).join(', ');
     }
     costLines += '. Upfront total: ' + upfrontTotal;
-    if (careTier) {
-      costLines += '. Ongoing: ' + careTier.name + ' ' + careTier.price;
+    const monthly = [careTier, seoTier, contentTier]
+      .filter(Boolean)
+      .map((m) => m.name + ' ' + m.price);
+    if (monthly.length > 0) {
+      costLines += '. Ongoing: ' + monthly.join(', ');
     }
 
     const prompt =

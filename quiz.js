@@ -52,38 +52,42 @@
       noneValue: 'none',
       title: 'Do you need any advanced features or integrations?',
       options: [
-        { value: 'simple',   label: 'Simple add-ons',   sub: 'Live chat, newsletter signup, social feeds, cookie consent' },
-        { value: 'advanced', label: 'Advanced add-ons', sub: 'Booking systems, memberships, CRM or custom form setup' },
-        { value: 'none',     label: 'None of these',    sub: 'Just a great website' },
+        { value: 'simple',   label: 'Standard integrations', sub: 'Live chat, newsletter, social feeds, gallery, maps/reviews, form upgrades · £149.50 each' },
+        { value: 'advanced', label: 'Complex integrations',  sub: 'Bookings, membership, payments, CRM, multi-language · £299.50 each' },
+        { value: 'none',     label: 'None of these',         sub: 'Just a great website' },
       ],
     },
     {
       id: 'simpleAddons',
       type: 'multi',
-      title: 'Which simple features do you need?',
+      title: 'Which standard integrations do you need?',
       conditional: function (ans) {
         var t = Array.isArray(ans.addonTypes) ? ans.addonTypes : [];
         return t.includes('simple') && !t.includes('none');
       },
       options: [
-        { value: 'live_chat',      label: 'Live chat',              sub: 'Chat widget so visitors can message you directly · £149.50' },
-        { value: 'newsletter',     label: 'Newsletter signup',       sub: 'Email capture connected to Mailchimp or similar · £149.50' },
-        { value: 'social_feed',    label: 'Social media feed',       sub: 'Display your Instagram or Facebook feed on the site · £149.50' },
-        { value: 'cookie_consent', label: 'Cookie consent banner',  sub: 'GDPR-compliant cookie notice and preference manager · £149.50' },
+        { value: 'live_chat',     label: 'Live chat widget',            sub: 'Chat widget so visitors can message you directly · £149.50' },
+        { value: 'newsletter',    label: 'Newsletter signup',            sub: 'Email capture connected to Mailchimp or similar · £149.50' },
+        { value: 'social_feed',   label: 'Social media feeds',           sub: 'Display your Instagram or Facebook feed on the site · £149.50' },
+        { value: 'image_gallery', label: 'Image gallery',                sub: 'A polished, filterable gallery for your photos or work · £149.50' },
+        { value: 'maps_reviews',  label: 'Google Maps / reviews embed', sub: 'Show your location and live Google reviews on the site · £149.50' },
+        { value: 'form_upgrades', label: 'Contact-form upgrades',        sub: 'File uploads, multi-step forms, and smarter enquiries · £149.50' },
       ],
     },
     {
       id: 'advancedAddons',
       type: 'multi',
-      title: 'Which advanced features do you need?',
+      title: 'Which complex integrations do you need?',
       conditional: function (ans) {
         var t = Array.isArray(ans.addonTypes) ? ans.addonTypes : [];
         return t.includes('advanced') && !t.includes('none');
       },
       options: [
-        { value: 'booking_system', label: 'Booking / appointment system', sub: 'Let clients book slots or appointments online · £299.50 (included with Pro)' },
-        { value: 'membership',     label: 'Membership & gated content',   sub: 'Private pages, login areas, or member-only sections · £299.50' },
-        { value: 'crm_forms',      label: 'CRM or custom form setup',     sub: 'Complex forms, lead routing, or CRM integration · £299.50' },
+        { value: 'booking_system',      label: 'Booking / reservation system',  sub: 'Let clients book slots or appointments online · £299.50 (included with Pro)' },
+        { value: 'membership',          label: 'Membership / login area',       sub: 'Private pages, login areas, or member-only sections · £299.50' },
+        { value: 'payment_integration', label: 'Payment integration',           sub: 'Deposits, one-off payments, or similar custom payment flows · £299.50' },
+        { value: 'crm_integration',     label: 'CRM / third-party integration', sub: 'Connect your site to HubSpot, Zoho, or other tools · £299.50' },
+        { value: 'multi_language',      label: 'Multi-language support',        sub: 'Serve your site in more than one language · £299.50' },
       ],
     },
     {
@@ -94,6 +98,23 @@
         { value: 'regular', label: 'Yes, regular updates and support', sub: 'Ongoing updates and priority help · £95/month' },
         { value: 'full',    label: 'Yes, full priority support',       sub: 'More hours, same-day priority, strategy calls · £185/month' },
         { value: 'no',      label: 'No, just build it',                sub: "I'll handle updates myself" },
+      ],
+    },
+    {
+      id: 'seo',
+      title: 'Do you want ongoing SEO to help you get found on Google?',
+      options: [
+        { value: 'local',  label: 'Yes, local basics',      sub: 'On-page optimisation, local citations, rank tracking, Google Business Profile · £149/month' },
+        { value: 'growth', label: 'Yes, aggressive growth', sub: 'Everything in Local plus backlinks, technical SEO, competitor tracking · £299/month' },
+        { value: 'no',     label: 'No, not right now',      sub: 'You can add an SEO plan any time later' },
+      ],
+    },
+    {
+      id: 'content',
+      title: 'Do you want us to write regular content for your site?',
+      options: [
+        { value: 'yes', label: 'Yes, monthly blog posts',   sub: '4 professionally written posts every month · £300/month' },
+        { value: 'no',  label: "No, we'll handle content", sub: 'Single posts are available any time at £85 each' },
       ],
     },
     {
@@ -167,23 +188,29 @@
     },
   };
 
-  // ── Simple add-ons checklist (standard integrations) ──────────
+  // ── Simple add-ons checklist (standard integrations, £149.50 each) ──
+  // Matches the "Standard Integrations" list on pricing.html exactly.
   const SIMPLE_ADDONS = {
-    live_chat:      { name: 'Live chat',             price: 149.50, priceDisplay: '£149.50', desc: 'Chat widget so visitors can message you directly from your website' },
-    newsletter:     { name: 'Newsletter signup',      price: 149.50, priceDisplay: '£149.50', desc: 'Email capture form connected to Mailchimp, ConvertKit, or similar' },
-    social_feed:    { name: 'Social media feed',      price: 149.50, priceDisplay: '£149.50', desc: 'Display your Instagram or Facebook feed automatically on your site' },
-    cookie_consent: { name: 'Cookie consent banner', price: 149.50, priceDisplay: '£149.50', desc: 'GDPR-compliant cookie notice and preference manager' },
+    live_chat:     { name: 'Live chat widget',            price: 149.50, priceDisplay: '£149.50', desc: 'Chat widget so visitors can message you directly from your website' },
+    newsletter:    { name: 'Newsletter signup',            price: 149.50, priceDisplay: '£149.50', desc: 'Email capture form connected to Mailchimp, ConvertKit, or similar' },
+    social_feed:   { name: 'Social media feeds',           price: 149.50, priceDisplay: '£149.50', desc: 'Display your Instagram or Facebook feed automatically on your site' },
+    image_gallery: { name: 'Image gallery',                price: 149.50, priceDisplay: '£149.50', desc: 'A polished, filterable gallery for your photos, products, or work' },
+    maps_reviews:  { name: 'Google Maps / reviews embed', price: 149.50, priceDisplay: '£149.50', desc: 'Show your location and live Google reviews directly on the site' },
+    form_upgrades: { name: 'Contact-form upgrades',        price: 149.50, priceDisplay: '£149.50', desc: 'File uploads, multi-step forms, and smarter enquiry handling' },
   };
 
-  // ── Advanced add-ons checklist (complex integrations) ─────────
+  // ── Advanced add-ons checklist (complex integrations, £299.50 each) ──
+  // Matches the "Complex Integrations" list on pricing.html exactly.
   // guardPayment: if this payment type was selected in the payments Q,
-  // skip this add-on (it is already covered by ADDON.booking_payment).
+  // skip this add-on (it is already covered by the payment-triggered add-on).
   // includedInPlans: plans that already include this feature, so it is
   // never charged on top (e.g. Pro includes the booking system).
   const ADVANCED_ADDONS = {
-    booking_system: { name: 'Booking / appointment system', price: 299.50, priceDisplay: '£299.50', desc: 'Let clients book appointments or slots online, with email confirmations', guardPayment: 'bookings', includedInPlans: ['pro', 'ecommerce'] },
-    membership:     { name: 'Membership & gated content',   price: 299.50, priceDisplay: '£299.50', desc: 'Private pages, login areas, or member-only sections of your site' },
-    crm_forms:      { name: 'CRM or custom form setup',     price: 299.50, priceDisplay: '£299.50', desc: 'Complex multi-step forms, lead routing, or integration with your CRM' },
+    booking_system:      { name: 'Booking / reservation system',  price: 299.50, priceDisplay: '£299.50', desc: 'Let clients book appointments or slots online, with email confirmations', guardPayment: 'bookings', includedInPlans: ['pro', 'ecommerce'] },
+    membership:          { name: 'Membership / login area',       price: 299.50, priceDisplay: '£299.50', desc: 'Private pages, login areas, or member-only sections of your site' },
+    payment_integration: { name: 'Payment integration',           price: 299.50, priceDisplay: '£299.50', desc: 'Deposits, one-off payments, or similar custom payment flows', guardPayment: 'other', includedInPlans: ['ecommerce'] },
+    crm_integration:     { name: 'CRM / third-party integration', price: 299.50, priceDisplay: '£299.50', desc: 'Connect your site and forms to HubSpot, Zoho, or other tools' },
+    multi_language:      { name: 'Multi-language support',        price: 299.50, priceDisplay: '£299.50', desc: 'Serve your site in more than one language' },
   };
 
   // ── Care tiers ────────────────────────────────────────────────
@@ -193,6 +220,19 @@
     light:   { name: 'Basic Care',  priceDisplay: '£45/month',  price: 45,  desc: "You'd like occasional help after launch. Basic Care covers hosting management, security monitoring, backup checks, and up to 45 minutes of small tweaks each month." },
     regular: { name: 'Growth Care', priceDisplay: '£95/month',  price: 95,  desc: "You're after regular support after launch. Growth Care includes everything in Basic plus up to 2 hours of updates, Google Business Profile updates, a monthly performance summary, and priority support." },
     full:    { name: 'Pro Care',    priceDisplay: '£185/month', price: 185, desc: "You want full ongoing support, a great call. Pro Care includes everything in Growth plus up to 4 hours of updates each month, same-day priority, and a quarterly strategy call." },
+  };
+
+  // ── SEO plans (monthly, stack with care plans and the content pack) ──
+  const SEO = {
+    no:     null,
+    local:  { name: 'SEO Local',  priceDisplay: '£149/month', price: 149, desc: 'On-page optimisation, local citation building, keyword rank tracking, and Google Business Profile optimisation to get you found by customers near you.' },
+    growth: { name: 'SEO Growth', priceDisplay: '£299/month', price: 299, desc: 'Everything in SEO Local plus backlink outreach, technical SEO, and competitor tracking for businesses competing beyond their local patch.' },
+  };
+
+  // ── Content pack (monthly; single posts also available at £85 each) ──
+  const CONTENT = {
+    no:  null,
+    yes: { name: 'Content pack (4 blog posts)', priceDisplay: '£300/month', price: 300, desc: 'Four professionally written blog posts every month, published and formatted on your site. Single posts are also available at £85 each.' },
   };
 
   // ── Budget limits ─────────────────────────────────────────────
@@ -493,11 +533,13 @@
 
   // ── Finish: pick plan, call AI, show result ───────────────────
   async function finish() {
-    var planKey    = pickPlan(answers);
-    var addons     = buildAddons(answers, planKey);
-    var careTier   = CARE[answers.care] || null;
-    var totalPrice = PLAN[planKey].price + addons.reduce(function (s, a) { return s + a.price; }, 0);
-    var budget     = checkBudget(planKey, addons, answers.budget);
+    var planKey     = pickPlan(answers);
+    var addons      = buildAddons(answers, planKey);
+    var careTier    = CARE[answers.care] || null;
+    var seoTier     = SEO[answers.seo] || null;
+    var contentTier = CONTENT[answers.content] || null;
+    var totalPrice  = PLAN[planKey].price + addons.reduce(function (s, a) { return s + a.price; }, 0);
+    var budget      = checkBudget(planKey, addons, answers.budget);
 
     setProgress(100);
     quizNav.style.display = 'none';
@@ -531,6 +573,8 @@
           addons:       addons.map(function (a) { return { name: a.name, price: a.priceDisplay }; }),
           upfrontTotal: fmtTotal(planKey, totalPrice),
           careTier:     careTier ? { name: careTier.name, price: careTier.priceDisplay } : null,
+          seoTier:      seoTier ? { name: seoTier.name, price: seoTier.priceDisplay } : null,
+          contentTier:  contentTier ? { name: contentTier.name, price: contentTier.priceDisplay } : null,
           answers:      answers,
         }),
         signal: controller.signal,
@@ -545,14 +589,16 @@
       // Timeout or network error: fallback text already set
     }
 
-    fadeTransition(function () { showResult(planKey, addons, careTier, totalPrice, budget, explanation); });
+    fadeTransition(function () { showResult(planKey, addons, careTier, seoTier, contentTier, totalPrice, budget, explanation); });
   }
 
   // ── Result screen ─────────────────────────────────────────────
-  function showResult(planKey, addons, careTier, totalPrice, budget, explanation) {
+  function showResult(planKey, addons, careTier, seoTier, contentTier, totalPrice, budget, explanation) {
     var plan    = PLAN[planKey];
     var wb      = budget.withinBudget;
     var wbTotal = PLAN[wb.planKey].price + wb.addons.reduce(function (s, a) { return s + a.price; }, 0);
+
+    var monthlyTiers = [careTier, seoTier, contentTier].filter(Boolean);
 
     function summaryBox(pk, arr, upfront) {
       var p    = PLAN[pk];
@@ -563,9 +609,9 @@
       if (arr.length > 0) {
         rows += '<div class="quiz-result-sum-row quiz-result-sum-total"><span><strong>Estimated upfront total</strong></span><strong>' + fmtTotal(pk, upfront) + '</strong></div>';
       }
-      if (careTier) {
-        rows += '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + careTier.name + '</span><strong>' + careTier.priceDisplay + '</strong></div>';
-      }
+      monthlyTiers.forEach(function (m) {
+        rows += '<div class="quiz-result-sum-row quiz-result-sum-mrr"><span>' + m.name + '</span><strong>' + m.priceDisplay + '</strong></div>';
+      });
       return '<div class="quiz-result-summary-box">' + rows + '</div>' +
         '<p class="quiz-result-rec-note">' + p.foundingNote + '</p>';
     }
@@ -602,7 +648,7 @@
       var items = [{ label: p.name + ' build (founding rate)', value: p.priceDisplay }];
       arr.forEach(function (a) { items.push({ label: a.name, value: a.priceDisplay }); });
       if (arr.length > 0) items.push({ label: 'Estimated upfront total', value: fmtTotal(pk, upfront), isTotal: true });
-      if (careTier)       items.push({ label: careTier.name, value: careTier.priceDisplay, isMrr: true });
+      monthlyTiers.forEach(function (m) { items.push({ label: m.name, value: m.priceDisplay, isMrr: true }); });
 
       var lines = ['Estimated plan from website quiz (subject to confirmation):', ''];
       items.forEach(function (item) { lines.push(item.label + ': ' + item.value); });
@@ -611,14 +657,23 @@
       return JSON.stringify({ items: items, text: lines.join('\n') });
     }
 
-    var careHtml = careTier
-      ? '<div class="quiz-result-care-box">' +
-          '<div class="quiz-result-care-name">' + careTier.name +
-            '<span class="quiz-result-care-price">' + careTier.priceDisplay + '</span>' +
+    // One box per chosen monthly service (care plan, SEO plan, content pack)
+    var monthlyHtml = monthlyTiers.map(function (m) {
+      return '<div class="quiz-result-care-box">' +
+          '<div class="quiz-result-care-name">' + m.name +
+            '<span class="quiz-result-care-price">' + m.priceDisplay + '</span>' +
           '</div>' +
-          '<p class="quiz-result-care-reason">' + careTier.desc + '</p>' +
-        '</div>'
-      : '';
+          '<p class="quiz-result-care-reason">' + m.desc + '</p>' +
+        '</div>';
+    }).join('');
+
+    // Offer whatever monthly extras the visitor did not pick, and always
+    // mention single blog posts at £85.
+    var extraParts = [];
+    if (!seoTier)     extraParts.push('SEO Local at £149/mo or SEO Growth at £299/mo');
+    if (!contentTier) extraParts.push('blog posts at £85 each (or a 4-post monthly pack for £300/mo)');
+    else              extraParts.push('single blog posts at £85 each whenever you need an extra one');
+    var extrasHtml = '<p class="quiz-result-extras">Also available, priced separately: ' + extraParts.join(', plus ') + '. Everything stacks with any care plan.</p>';
 
     var ctasHtml =
       '<div class="quiz-result-ctas">' +
@@ -680,8 +735,8 @@
           '<p class="quiz-result-intro">' + explanation + '</p>' +
         '</div>' +
         recsHtml +
-        careHtml +
-        '<p class="quiz-result-extras">Optional extras, priced separately: blog posts at £85 each (or a 4-post monthly pack for £300/mo) and our SEO Booster at £149/mo for on-page optimisation, local citations, rank tracking, and Google Business Profile optimisation. Both stack with any care plan.</p>' +
+        monthlyHtml +
+        extrasHtml +
         '<p class="quiz-result-disclaimer">This is an estimate to give you a clear starting point, based on what you\'ve told us. The final price may shift slightly once we\'ve had a proper chat about your project and the details. Sometimes things turn out simpler than expected, sometimes there\'s a bit more to it. Either way, there are no surprises: we\'ll always confirm everything with you in writing before any work begins.</p>' +
         ctasHtml +
       '</div>';
