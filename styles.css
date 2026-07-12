@@ -342,7 +342,6 @@ ul { padding: 0; margin: 0; list-style: none; }
 }
 .highlight {
   color: var(--accent);
-  font-style: italic;
   padding: 0 .02em .06em;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8' preserveAspectRatio='none'%3E%3Cpath d='M2 6 Q 30 2.5 60 4.5 T 118 3.5' fill='none' stroke='%232c4a9e' stroke-width='2.6' stroke-linecap='round' opacity='.4'/%3E%3C/svg%3E") no-repeat bottom / 100% .16em;
 }
@@ -468,26 +467,18 @@ ul { padding: 0; margin: 0; list-style: none; }
 
 /* ---------- Section heads ---------- */
 .section-head { max-width: 620px; margin: 0 auto 52px; text-align: center; }
+/* Section eyebrows as quiet accent chips: the brand's section signature */
 .eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  display: inline-block;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: 14px;
-}
-/* Flanking rules on centered section eyebrows: the brand's section signature */
-.section-head .eyebrow::before,
-.section-head .eyebrow::after {
-  content: '';
-  width: 26px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--accent-tint);
-  opacity: .7;
+  background: var(--accent-soft);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
 }
 .section-head h2, .contact-info h2 {
   font-size: clamp(28px, 4vw, 38px);
@@ -582,8 +573,7 @@ ul { padding: 0; margin: 0; list-style: none; }
   font-size: 52px;
   font-weight: 600;
   line-height: 1;
-  color: var(--accent-soft);
-  -webkit-text-stroke: 1.3px var(--accent);
+  color: var(--accent-tint);
   margin-bottom: 14px;
 }
 .step h3 { font-size: 19px; font-weight: 700; margin: 0 0 8px; }
@@ -613,7 +603,8 @@ ul { padding: 0; margin: 0; list-style: none; }
   background-size: 28px 28px;
   pointer-events: none;
 }
-.work-card h3, .work-card .work-tag { position: relative; z-index: 1; }
+.work-card h3 { position: relative; z-index: 1; }
+.work-card .work-tag { z-index: 1; } /* .work-tag stays position:absolute (top-left) */
 .work-1 { background: linear-gradient(160deg, #e7ecfa, #f4f6fc); }
 .work-2 { background: linear-gradient(160deg, #f7e8d3, #fbf3e7); }
 .work-3 { background: linear-gradient(160deg, #e7e4d8, #f3f1e9); }
@@ -839,7 +830,7 @@ ul { padding: 0; margin: 0; list-style: none; }
   color: rgba(255,255,255,.055);
   pointer-events: none;
 }
-.contact-info .eyebrow { color: var(--accent-tint); }
+.contact-info .eyebrow { color: var(--accent-tint); background: rgba(147,174,240,.16); }
 .contact-info h2 { color: #fff; }
 .contact-info p { color: #c9d0cb; font-size: 15.5px; line-height: 1.6; margin: 0 0 32px; }
 .contact-detail { margin-bottom: 20px; }
